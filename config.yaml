@@ -1,0 +1,35 @@
+# Single source of truth for every generated parameter (see docs/data_dictionary.md)
+seed: 42
+
+rwa:
+  num_wavelengths: 4        # W: 4 or 8
+  top_k_requests: 20        # K: 10 / 20 / 40
+  reach_km: 4000            # TODO: confirm after link lengths are computed (Step 1.7b)
+  routes_per_request: 3     # first attempt
+  max_routes: 5             # used by the feedback loop (Step 5.4)
+  lightpath_capacity_mbps: 100  # TODO: set after checking real demand scale (Step 1.5)
+
+csp:
+  max_assignments: 1000000  # safety cap, returns status "timeout"
+
+nn:
+  seeds: [0, 1, 2, 3, 4]
+  hidden: [64, 64]
+  lr: 0.001
+  batch_size: 256
+  max_epochs: 100
+
+split:
+  train_hours: [0, 503]     # weeks 1-3
+  test_hours: [504, 671]    # week 4
+  val_last_days: 3
+
+# Filled in at Step 1.9 after verifying the mapping with matrix A
+node_order: []
+
+paths:
+  raw: data/raw
+  processed: data/processed
+  outputs: outputs
+  abilene_topology: data/raw/abilene.txt
+  germany50_topology: data/raw/germany50.txt
