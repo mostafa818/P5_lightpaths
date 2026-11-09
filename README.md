@@ -16,6 +16,17 @@ python -m eval.run_experiments
 pytest
 ```
 
+## Data sources (decided; SNDlib download links returned 404)
+| Item | Source | Notes |
+|---|---|---|
+| Abilene topology | `abilene_sndlib_native.txt` (SNDlib native format, copy from a public GitHub repo) | 12 nodes, 15 links, lon/lat per node |
+| germany50 topology | `germany50.json` (TopoHub copy of SNDlib) | 50 nodes, 88 links, `dist` in km; Experiment 1 only |
+| Traffic (primary) | Zhang weekly files `X06`-`X09` + routing matrix `A` | needs node-mapping check (Step 1.9) |
+| Mapping cross-check | `demandMatrix-abilene-zhang-5min-20040301-0145.txt` (SNDlib sample) | compare with slot 21 of `X01` |
+| Fallback traffic | SNDlib Abilene dynamic matrices | only if Zhang files unobtainable; availability unverified |
+
+Raw files go in `data/raw/` (traffic) and `data/raw/topology/` (topologies); both are git-ignored. Cite SNDlib and Yin Zhang's Abilene data in the report and state the topology files are copies (TopoHub, GitHub mirror).
+
 ## Layout
 `config.yaml` (all parameters) | `src/{data,nn,search,csp,integration,eval}/` | `src/common.py` (interface contract) | `src/tests/` | `data/{raw,processed}/` | `outputs/` | `report/` | `docs/`
 

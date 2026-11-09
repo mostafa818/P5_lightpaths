@@ -1,5 +1,8 @@
 data/raw/*
 !data/raw/.gitkeep
+!data/raw/topology/
+data/raw/topology/*
+!data/raw/topology/.gitkeep
 .venv/
 __pycache__/
 *.pyc

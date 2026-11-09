@@ -24,12 +24,14 @@ split:
   test_hours: [504, 671]    # week 4
   val_last_days: 3
 
-# Filled in at Step 1.9 after verifying the mapping with matrix A
-node_order: []
+# Abilene router order from the plan's Data scenario (alphabetical).
+# UNVERIFIED until Step 1.9 (check with matrix A and the SNDlib sample matrix).
+node_order: [ATLAM5, ATLAng, CHINng, DNVRng, HSTNng, IPLSng, KSCYng, LOSAng, NYCMng, SNVAng, STTLng, WASHng]
 
 paths:
   raw: data/raw
   processed: data/processed
   outputs: outputs
-  abilene_topology: data/raw/abilene.txt
-  germany50_topology: data/raw/germany50.txt
+  abilene_topology: data/raw/topology/abilene_sndlib_native.txt
+  germany50_topology: data/raw/topology/germany50.json
+  sndlib_sample_matrix: data/raw/topology/demandMatrix-abilene-zhang-5min-20040301-0145.txt
