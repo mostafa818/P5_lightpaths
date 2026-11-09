@@ -14,7 +14,7 @@ pytest
 ```
 
 ## Layout
-`config.yaml` (all parameters) | `src/{data,nn,search,csp,integration,eval}/` | `src/common.py` (interface contract) | `tests/` | `data/{raw,processed}/` | `outputs/` | `report/` | `docs/`
+`config.yaml` (all parameters) | `src/{data,nn,search,csp,integration,eval}/` | `src/common.py` (interface contract) | `src/tests/` | `data/{raw,processed}/` | `outputs/` | `report/` | `docs/`
 
 ## Counter definitions (both members MUST count this way)
 **Search**
