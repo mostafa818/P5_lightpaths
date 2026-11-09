@@ -1,6 +1,7 @@
 # P5 Lightpaths: Route and Wavelength Assignment (Search + CSP + NN)
 
 ## Setup
+Python 3.12. NN library: scikit-learn (MLPRegressor).
 ```
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
