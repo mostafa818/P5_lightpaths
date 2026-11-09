@@ -4,12 +4,13 @@
 ```
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+pip install -e .      # puts src/ on the import path (no PYTHONPATH needed)
 ```
 Commands (filled in as stages are completed):
 ```
 python make_data.py
 python run_demo.py ...
-PYTHONPATH=src python -m eval.run_experiments
+python -m eval.run_experiments
 pytest
 ```
 

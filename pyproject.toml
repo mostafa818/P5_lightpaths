@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "p5-lightpaths"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["common"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["data*", "nn*", "search*", "csp*", "integration*", "eval*"]
