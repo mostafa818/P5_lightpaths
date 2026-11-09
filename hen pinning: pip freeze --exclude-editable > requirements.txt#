@@ -1,2 +1,0 @@
-pip install -e .      # puts src/ on the import path (no PYTHONPATH needed)
-

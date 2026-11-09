@@ -5,7 +5,7 @@
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 pip install -e .      # puts src/ on the import path (no PYTHONPATH needed)
-
+# when pinning: pip freeze --exclude-editable > requirements.txt
 ```
 Commands (filled in as stages are completed):
 ```
