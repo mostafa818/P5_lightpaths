@@ -44,6 +44,17 @@ Raw files go in `data/raw/` (traffic) and `data/raw/topology/` (topologies); bot
 - Dataset: `data/processed/hourly.npz` (672 x 132, Mbps hourly mean), `meta.json`. Train hours 0-503, validation 432-503 (last 3 days of train), test 504-671. Hour 0 = 2004-05-01 00:00 (Saturday); keep this in mind for weekday features.
 - Traffic is bursty (single pairs reach 5 Gbps for an hour against a per-pair median of 11 Mbps); weekly boundaries are continuous (first/last-hour ratio 0.95-0.97).
 
+## Neural network results (Stage 4, test week = hours 504-671, 5 seeds, mean +- std)
+Train: `python -m nn.train` (writes `outputs/nn/`, `outputs/nn_eval.json`). 29 features, 34,848 train / 9,504 validation / 22,176 test rows.
+
+| Method | MAE (Mbps) | RMSE (Mbps) | top-10 hit | top-20 hit | top-40 hit |
+|---|---|---|---|---|---|
+| last hour (t-1) | 4.418 | 54.28 | 0.899 | 0.898 | 0.925 |
+| same hour last week (t-168) | 11.118 | 118.27 | 0.823 | 0.816 | 0.856 |
+| NN (MLP 2x64) | 4.630 +- 0.220 | 62.65 +- 2.01 | 0.899 +- 0.002 | 0.901 +- 0.001 | 0.927 +- 0.001 |
+
+Honest reading: the NN does **not** beat the last-hour baseline on MAE or RMSE (traffic is bursty and the NN is trained on the log scale). Its top-K hit rate is equal at K=10 and about 0.002-0.003 higher at K=20/40, which is within noise of practical relevance. No tuning on the test set was done. `forecast(t, seed=0)` in `src/nn/forecast.py` returns 132 non-negative predictions using only data up to t-1.
+
 ## Layout
 `config.yaml` (all parameters) | `src/{data,nn,search,csp,integration,eval}/` | `src/common.py` (interface contract) | `src/tests/` | `data/{raw,processed}/` | `outputs/` | `report/` | `docs/`
 
