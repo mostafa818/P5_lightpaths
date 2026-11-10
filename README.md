@@ -27,6 +27,9 @@ pytest
 
 Raw files go in `data/raw/` (traffic) and `data/raw/topology/` (topologies); both are git-ignored. Cite SNDlib and Yin Zhang's Abilene data in the report and state the topology files are copies (TopoHub, GitHub mirror).
 
+## Getting the raw data
+`data/raw/` is git-ignored. Download Yin Zhang's Abilene traffic-matrix files (`A`, `X06.gz`-`X09.gz`, `X01.gz`, `readme.txt`; dataset page believed to be cs.utexas.edu/~yzhang/research/AbileneTM/ - not re-verified from the build sandbox) into `data/raw/`, and the topology files into `data/raw/topology/`. `make_data.py` stops with a clear message if a file is missing and stores a SHA-256 of each raw file in `data/processed/meta.json`, so a rerun can be checked against the original data. Project team copy: branch `raw-data` (never merge into main).
+
 ## Raw files (Step 1.1; never edited, only read)
 | File | Size (bytes) | Content |
 |---|---|---|

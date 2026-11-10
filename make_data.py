@@ -13,7 +13,11 @@ os.makedirs(out_dir, exist_ok=True)
 nodes = cfg["node_order"]
 assert len(nodes) == 12
 
-weeks = ["X06", "X07", "X08", "X09"]          # 2004-05-01 .. 2004-05-28, consecutive
+weeks = ["X06", "X07", "X08", "X09"]
+missing = [w + ".gz" for w in weeks if not os.path.exists(os.path.join(raw_dir, w + ".gz"))]
+if missing:
+    sys.exit(f"Missing raw files in {raw_dir}: {missing}\n"
+             "Download Yin Zhang's Abilene weekly files (X06-X09.gz) into data/raw/ - see README 'Getting the raw data'.")          # 2004-05-01 .. 2004-05-28, consecutive
 hourly, files, week5min = [], {}, []
 for w in weeks:
     path = os.path.join(raw_dir, w + ".gz")
@@ -22,7 +26,7 @@ for w in weeks:
     h = P.drop_diagonal(P.to_hourly(x))             # 1.6, 1.7
     assert h.shape == (168, 132), h.shape
     hourly.append(h)
-    files[w] = os.path.getsize(path)
+    files[w] = {"bytes": os.path.getsize(path), "sha256": hashlib.sha256(open(path, "rb").read()).hexdigest()}
 H = np.concatenate(hourly, axis=0)                  # 1.10: (672, 132)
 chk = P.sanity_check(H)                             # 1.8
 # 1.8 boundary continuity: compare median total of last vs first 12 five-minute slots (a burst
