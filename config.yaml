@@ -7,7 +7,7 @@ rwa:
   reach_km: 5000            # Step 1.7b: longest shortest path is 4706 km (WASHng-STTLng); at 5000 km all 132 pairs have a route, 120 have >=2 and 98 have 3
   routes_per_request: 3     # first attempt
   max_routes: 5             # used by the feedback loop (Step 5.4)
-  lightpath_capacity_mbps: 100  # TODO: set after checking real demand scale (Step 1.5)
+  lightpath_capacity_mbps: 9920  # OC-192 usable rate, = Abilene link capacity in the SNDlib topology (Step 1.12)
 
 csp:
   max_assignments: 1000000  # safety cap, returns status "timeout"
@@ -24,8 +24,8 @@ split:
   test_hours: [504, 671]    # week 4
   val_last_days: 3
 
-# Abilene router order from the plan's Data scenario (alphabetical).
-# UNVERIFIED until Step 1.9 (check with matrix A and the SNDlib sample matrix).
+# Abilene router order (alphabetical). VERIFIED in Step 1.9: A.txt lists demands in this
+# src-major order, and X01 slot 21 matches the SNDlib 20040301-0145 sample (Spearman 1.000).
 node_order: [ATLAM5, ATLAng, CHINng, DNVRng, HSTNng, IPLSng, KSCYng, LOSAng, NYCMng, SNVAng, STTLng, WASHng]
 
 paths:

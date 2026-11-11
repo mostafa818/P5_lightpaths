@@ -27,6 +27,23 @@ pytest
 
 Raw files go in `data/raw/` (traffic) and `data/raw/topology/` (topologies); both are git-ignored. Cite SNDlib and Yin Zhang's Abilene data in the report and state the topology files are copies (TopoHub, GitHub mirror).
 
+## Getting the raw data
+`data/raw/` is git-ignored. Download Yin Zhang's Abilene traffic-matrix files (`A`, `X06.gz`-`X09.gz`, `X01.gz`, `readme.txt`; dataset page believed to be cs.utexas.edu/~yzhang/research/AbileneTM/ - not re-verified from the build sandbox) into `data/raw/`, and the topology files into `data/raw/topology/`. `make_data.py` stops with a clear message if a file is missing and stores a SHA-256 of each raw file in `data/processed/meta.json`, so a rerun can be checked against the original data. Project team copy: branch `raw-data` (never merge into main).
+
+## Raw files (Step 1.1; never edited, only read)
+| File | Size (bytes) | Content |
+|---|---|---|
+| `X06.gz` / `X07.gz` / `X08.gz` / `X09.gz` | 7,496,632 / 7,493,819 / 7,478,898 / 7,331,758 | weeks starting 2004-05-01 / 05-08 / 05-15 / 05-22 (used) |
+| `X01.gz` (week 2004-03-01), `X10.gz` | 7,320,862 / 7,333,278 | cross-check, spare week |
+| `A.txt` | 22,033 | routing matrix (link, demand, fraction); 144 demands in src-major alphabetical order |
+| `readme.txt`, `links`, `demands`, `topo-2003-04-10.txt` | 2,671 / 1,038 / 2,672 / 1,587 | Zhang's documentation and topology |
+
+## Data pipeline results (Steps 1.2-1.10)
+- Each X file: 2,016 lines x 720 values (144 OD pairs x 5 blocks); block 0 is the real measurement, the other four are gravity-model estimates and are NOT used.
+- Mapping verified (Step 1.9): `A.txt` names the demands in alphabetical src-major order; the 15-link topology in `links` equals the SNDlib Abilene links; X01 slot 21 vs the SNDlib 2004-03-01 01:45 sample gives Spearman 1.000 (transposed: 0.80), so rows = senders. Median ratio 2.67e-6 confirms the unit formula Mbps = v x 100 x 8 / (300 x 1e6). Paths implied by `A.txt` match the distance-shortest paths for 114 of 132 pairs (OSPF uses weights, not distance).
+- Dataset: `data/processed/hourly.npz` (672 x 132, Mbps hourly mean), `meta.json`. Train hours 0-503, validation 432-503 (last 3 days of train), test 504-671. Hour 0 = 2004-05-01 00:00 (Saturday); keep this in mind for weekday features.
+- Traffic is bursty (single pairs reach 5 Gbps for an hour against a per-pair median of 11 Mbps); weekly boundaries are continuous (first/last-hour ratio 0.95-0.97).
+
 ## Layout
 `config.yaml` (all parameters) | `src/{data,nn,search,csp,integration,eval}/` | `src/common.py` (interface contract) | `src/tests/` | `data/{raw,processed}/` | `outputs/` | `report/` | `docs/`
 
