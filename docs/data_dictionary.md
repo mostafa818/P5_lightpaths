@@ -14,7 +14,7 @@
 | Hourly demand | Mean of 12 consecutive 5-min Mbps values; array (672, 132). |
 | 132 ordered pairs | 12x12 matrix, rows = sender, cols = receiver, diagonal removed, src-major, alphabetical router order. |
 | Splits | Chronological: train hours 0-503, validation 432-503 (last 3 days of train), test 504-671. First usable target hour 168 (lag-168 feature). |
-| Link lengths (km) | Haversine distance between endpoint coordinates (Member B, Step 1.7b). |
+| Link lengths (km) | Haversine distance between the endpoint longitude/latitude of each of the 15 SNDlib Abilene links (Member B, Step 1.7b); 132 km to 2,193 km, 14,029 km in total. Saved in `data/processed/abilene_links.csv` by `python -m search.topology`. |
 
 ## Generated parameters (all in `config.yaml`)
 | Parameter | Value | How it is set |
@@ -22,7 +22,7 @@
 | Seed | 42 | Fixed global seed; every random choice uses it or a documented derivative. |
 | W (wavelengths) | 4 or 8 | Experiment variable. |
 | K (top-K requests) | 10 / 20 / 40 | Experiment variable. |
-| Reach limit (km) | 4000 (placeholder) | Maximum length of a lightpath route; final value set by Member B at Step 1.7b from the Abilene link lengths. |
+| Reach limit (km) | 5000 | Maximum length of a lightpath route. Set by Member B at Step 1.7b from the link lengths: the longest shortest path is 4,706 km (WASHng-STTLng), so 4000 would leave 12 of the 132 pairs without any route. At 5000 km every pair has a route, 120 pairs have at least 2 routes and 98 have 3. |
 | Routes per request / max routes | 3 / 5 | 3 first, 5 in the feedback loop (Step 5.4). |
 | Lightpath capacity (Mbps) | 9920 | OC-192 usable rate, equal to the capacity of 14 of the 15 SNDlib Abilene links (one link has 2480). One lightpath per request; every request fits, since the largest hourly pair demand observed is about 5.2 Gbps. |
 | CSP safety cap | 1,000,000 assignments | Returns status `timeout` with the counters. |
