@@ -105,3 +105,25 @@ def parse_sndlib(text: str) -> Topology:
 def load_topology(path) -> Topology:
     """Read and parse an SNDlib native file from disk."""
     return parse_sndlib(Path(path).read_text(encoding="utf-8", errors="replace"))
+
+
+def write_links_csv(topo: Topology, path) -> None:
+    """Save the derived link lengths (plan Step 1.7b: 'save as length_km')."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as fh:
+        fh.write("u,v,length_km\n")
+        for (u, v), length in sorted(topo.links.items()):
+            fh.write(f"{u},{v},{length:.3f}\n")
+
+
+if __name__ == "__main__":
+    # python -m search.topology  ->  data/processed/abilene_links.csv
+    import yaml
+
+    cfg = yaml.safe_load(open("config.yaml"))
+    topo = load_topology(cfg["paths"]["abilene_topology"])
+    out = Path(cfg["paths"]["processed"]) / "abilene_links.csv"
+    write_links_csv(topo, out)
+    print(f"{len(topo.nodes)} nodes, {len(topo.links)} links, "
+          f"total {sum(topo.links.values()):.0f} km -> {out}")
