@@ -6,18 +6,18 @@ from data import pipeline as P
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 cfg = yaml.safe_load(open(os.path.join(ROOT, "config.yaml")))
-np.random.seed(cfg["seed"])
+np.random.seed(cfg["seed"])   # this stage is deterministic (no random step); seeded for safety
 raw_dir = os.path.join(ROOT, cfg["paths"]["raw"])
 out_dir = os.path.join(ROOT, cfg["paths"]["processed"])
 os.makedirs(out_dir, exist_ok=True)
 nodes = cfg["node_order"]
 assert len(nodes) == 12
 
-weeks = ["X06", "X07", "X08", "X09"]
+weeks = ["X06", "X07", "X08", "X09"]   # 2004-05-01 .. 2004-05-28, consecutive weeks
 missing = [w + ".gz" for w in weeks if not os.path.exists(os.path.join(raw_dir, w + ".gz"))]
 if missing:
     sys.exit(f"Missing raw files in {raw_dir}: {missing}\n"
-             "Download Yin Zhang's Abilene weekly files (X06-X09.gz) into data/raw/ - see README 'Getting the raw data'.")          # 2004-05-01 .. 2004-05-28, consecutive
+             "Download Yin Zhang's Abilene weekly files (X06-X09.gz) into data/raw/ - see README 'Getting the raw data'.")
 hourly, files, week5min = [], {}, []
 for w in weeks:
     path = os.path.join(raw_dir, w + ".gz")
