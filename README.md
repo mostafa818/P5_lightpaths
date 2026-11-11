@@ -53,7 +53,9 @@ Train: `python -m nn.train` (writes `outputs/nn/`, `outputs/nn_eval.json`). 29 f
 | same hour last week (t-168) | 11.118 | 118.27 | 0.823 | 0.816 | 0.856 |
 | NN (MLP 2x64) | 4.630 +- 0.220 | 62.65 +- 2.01 | 0.899 +- 0.002 | 0.901 +- 0.001 | 0.927 +- 0.001 |
 
-Honest reading: the NN does **not** beat the last-hour baseline on MAE or RMSE (traffic is bursty and the NN is trained on the log scale). Its top-K hit rate is equal at K=10 and about 0.002-0.003 higher at K=20/40, which is within noise of practical relevance. No tuning on the test set was done. `forecast(t, seed=0)` in `src/nn/forecast.py` returns 132 non-negative predictions using only data up to t-1.
+Honest reading: the NN does **not** beat the last-hour baseline on MAE or RMSE (traffic is bursty and the NN is trained on the log scale). There is **no measurable difference in top-K hit rate**: the paired per-hour difference NN minus last-hour is -0.0002 +- 0.0036 (K=10), +0.0029 +- 0.0024 (K=20) and +0.0020 +- 0.0015 (K=40) (SE over the 168 test hours; see `paired_hit_diff_vs_last_hour` in `outputs/nn_eval.json`), i.e. within about one standard error of zero. The worse RMSE/MAE is probably because the loss is on the log scale (it favours relative error), while the planner cares about the large pairs: the true top-20 pairs carry about 61% of total demand. Experiment 3 will show whether the planner notices. No tuning on the test set was done. `forecast(t, seed=0)` in `src/nn/forecast.py` returns 132 non-negative predictions using only data up to t-1.
+
+Note: the committed `outputs/nn/*.joblib` models only load with the pinned scikit-learn version in `requirements.txt` (1.9.1); regenerate them with `python -m nn.train` (about 10 s, bit-for-bit reproducible) if you change versions. `common.forecast(t)` delegates to `nn.forecast.forecast(t, seed=0)`.
 
 ## Layout
 `config.yaml` (all parameters) | `src/{data,nn,search,csp,integration,eval}/` | `src/common.py` (interface contract) | `src/tests/` | `data/{raw,processed}/` | `outputs/` | `report/` | `docs/`

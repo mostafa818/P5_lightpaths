@@ -104,3 +104,20 @@ def test_baselines_use_only_past(H):
     ts = [200, 300]
     assert np.array_equal(E.baseline_last_hour(H, ts)[0], H[199])
     assert np.array_equal(E.baseline_last_week(H, ts)[1], H[132])
+
+
+@needs_data
+def test_early_stopping_restores_best_weights(H):
+    sc = F.Scaler.fit(H[:432])
+    X, y = F.build_dataset(H, range(168, 300), sc)
+    Xv, yv = F.build_dataset(H, range(300, 340), sc)
+    z, zv = sc.transform(y), sc.transform(yv)
+    m, hist = train_mlp(0, X, z, Xv, zv, max_epochs=30, patience=3)
+    best = min(h["val_mse"] for h in hist)
+    assert float(np.mean((m.predict(Xv) - zv) ** 2)) == pytest.approx(best)
+
+
+@needs_model
+def test_common_forecast_delegates_to_nn():
+    import common
+    assert np.array_equal(common.forecast(504), FC.forecast(504, seed=0))

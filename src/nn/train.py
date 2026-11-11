@@ -27,6 +27,8 @@ def main():
     out_dir = os.path.join(ROOT, "outputs", "nn"); os.makedirs(out_dir, exist_ok=True)
     scaler.to_json(os.path.join(out_dir, "scaler.json"))
     true = H[list(test_ts)]
+    base_pred = E.baseline_last_hour(H, test_ts)
+    paired = {k: [] for k in E.KS}        # per-hour hit(NN) - hit(last hour), one array per seed
     results = {"baseline_last_hour": E.metrics(true, E.baseline_last_hour(H, test_ts)),
                "baseline_last_week": E.metrics(true, E.baseline_last_week(H, test_ts)),
                "val_baseline_last_hour": E.metrics(H[list(val_ts)], E.baseline_last_hour(H, val_ts)),
@@ -38,6 +40,8 @@ def main():
         joblib.dump(m, os.path.join(out_dir, f"mlp_seed{seed}.joblib"))
         pred = scaler.inverse(m.predict(Xte)).reshape(len(test_ts), -1)
         vpred = scaler.inverse(m.predict(Xva)).reshape(len(val_ts), -1)
+        for k in E.KS:
+            paired[k].append(E.topk_hits_per_hour(true, pred, k) - E.topk_hits_per_hour(true, base_pred, k))
         r = E.metrics(true, pred); r["epochs"] = len(hist)
         r["best_val_mse_log"] = min(h["val_mse"] for h in hist)
         r["val"] = E.metrics(H[list(val_ts)], vpred)
@@ -47,11 +51,19 @@ def main():
     keys = ["mae", "rmse", "hit@10", "hit@20", "hit@40"]
     results["nn_mean"] = {k: float(np.mean([r[k] for r in results["nn_seeds"].values()])) for k in keys}
     results["nn_std"] = {k: float(np.std([r[k] for r in results["nn_seeds"].values()], ddof=1)) for k in keys}
+    # paired difference vs last-hour per test hour (seed-averaged); SE over the 168 test hours
+    results["paired_hit_diff_vs_last_hour"] = {}
+    for k in E.KS:
+        d = np.mean(paired[k], axis=0)
+        results["paired_hit_diff_vs_last_hour"][f"hit@{k}"] = {
+            "mean": float(d.mean()), "se": float(d.std(ddof=1) / np.sqrt(len(d))), "n_hours": int(len(d))}
     json.dump(results, open(os.path.join(ROOT, "outputs", "nn_eval.json"), "w"), indent=1)
     print("\n%-22s" % "method" + " ".join("%10s" % k for k in keys))
     for name in ("baseline_last_hour", "baseline_last_week"):
         print("%-22s" % name + " ".join("%10.3f" % results[name][k] for k in keys))
     print("%-22s" % "NN mean" + " ".join("%10.3f" % results["nn_mean"][k] for k in keys))
+    for k, v in results["paired_hit_diff_vs_last_hour"].items():
+        print(f"paired {k} NN - last hour: {v['mean']:+.4f} +- {v['se']:.4f} (SE)")
     print("%-22s" % "NN std" + " ".join("%10.3f" % results["nn_std"][k] for k in keys))
 
 

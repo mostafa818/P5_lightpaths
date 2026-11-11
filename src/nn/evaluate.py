@@ -15,6 +15,11 @@ def topk_hit_rate(true: np.ndarray, pred: np.ndarray, k: int) -> float:
     return float(np.mean(hits))
 
 
+def topk_hits_per_hour(true: np.ndarray, pred: np.ndarray, k: int) -> np.ndarray:
+    return np.array([len(set(np.argsort(-tr, kind="stable")[:k]) & set(np.argsort(-pr, kind="stable")[:k])) / k
+                     for tr, pr in zip(true, pred)])
+
+
 def metrics(true: np.ndarray, pred: np.ndarray) -> dict:
     err = pred - true
     out = {"mae": float(np.abs(err).mean()), "rmse": float(np.sqrt((err ** 2).mean()))}

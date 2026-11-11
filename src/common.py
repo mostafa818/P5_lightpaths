@@ -58,5 +58,7 @@ def solve(requests: list, routes_by_request: dict, W: int,
 
 # --- A implements ---------------------------------------------------------
 def forecast(t: int) -> np.ndarray:
-    """132 non-negative predicted demands for hour t, using data up to t-1 only."""
-    raise NotImplementedError
+    """132 non-negative predicted demands for hour t, using data up to t-1 only.
+    Delegates to nn.forecast (extra `seed` argument there; default 0)."""
+    from nn.forecast import forecast as _forecast
+    return _forecast(t)
