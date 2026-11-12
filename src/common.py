@@ -46,8 +46,10 @@ def link_id(u: str, v: str) -> tuple:
 
 # --- B implements ---------------------------------------------------------
 def k_routes(graph: Any, src: str, dst: str, k: int, reach_km: float) -> list:
-    """Up to k loop-free routes (Yen), each with length_km <= reach_km."""
-    raise NotImplementedError
+    """Up to k loop-free routes (Yen), each with length_km <= reach_km.
+    `graph` is a search.graph.Graph. Delegates to search.routes (extra optional `stats` argument there)."""
+    from search.routes import k_routes as _k_routes
+    return _k_routes(graph, src, dst, k, reach_km)
 
 
 def solve(requests: list, routes_by_request: dict, W: int,

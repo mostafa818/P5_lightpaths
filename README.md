@@ -64,6 +64,9 @@ Note: the committed `outputs/nn/*.joblib` models only load with the pinned sciki
 **Search**
 - *nodes generated*: every node pushed onto the frontier.
 - *nodes expanded*: every node popped from the frontier and processed.
+- Details used by `src/search/algorithms.py` (BFS, UCS and A* all count the same way): the source counts as generated; the goal counts as expanded when it is popped (searches stop at pop, not at push); in UCS/A* a node is pushed again whenever a cheaper way to it is found, and each such push counts as generated; a stale queue entry for an already closed node is discarded without counting as expanded.
+
+**Search module** (`src/search/`): `topology.py` (Abilene and germany50 loaders, haversine link lengths), `graph.py` (adjacency-dict `Graph`, undirected link ids), `algorithms.py` (`bfs`, `ucs`, `astar`, all returning `(nodes, length_km)` or `None`), `routes.py` (Yen's algorithm, `k_routes`, reach limit inclusive). `common.k_routes` delegates to it.
 
 **CSP**
 - *assignments*: every tentative variable = value attempt.
