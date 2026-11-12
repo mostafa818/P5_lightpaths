@@ -71,6 +71,9 @@ Note: the committed `outputs/nn/*.joblib` models only load with the pinned sciki
 **CSP**
 - *assignments*: every tentative variable = value attempt.
 - *backtracks*: every time a variable has no value left and the search returns.
+- Details used by `src/csp/solver.py` (BT, BT+FC and BT+FC+AC-3 all count the same way): an assignment is counted each time a value is actually assigned to a variable, that is, after it passed the consistency check (plain BT) or was still in the domain (forward checking); values rejected by the check are not counted. A value undone because forward checking emptied a neighbour's domain is not a backtrack (the variable still has values to try); a backtrack is counted only when a variable runs out of values. AC-3 preprocessing counts neither. `max_assignments` stops the search before assignment number `max_assignments + 1` and returns status `timeout`.
+
+**CSP module** (`src/csp/`): `model.py` (variables sorted by predicted demand, highest first, ties keep input order; bitmask domains per wavelength; precomputed route-conflict masks; `validate` / `is_valid`), `solver.py` (`solve(requests, routes_by_request, W, use_fc, use_ac3, max_assignments)`: backtracking with shortest-route-then-lowest-wavelength value order, forward checking with a trail, AC-3 as preprocessing). The assignment maps request id to `(index into that request's route list, wavelength)`. A request with no route gives `No solution: no route within reach for request R`; when more requests are forced through one link than there are wavelengths the message is `No solution: wavelengths exhausted on link X-Y`. `common.solve` delegates to it.
 
 ## Git workflow
 Branches `member-a/...` and `member-b/...`; merge via pull request reviewed by the other member; small, frequent commits.

@@ -55,7 +55,9 @@ def k_routes(graph: Any, src: str, dst: str, k: int, reach_km: float) -> list:
 def solve(requests: list, routes_by_request: dict, W: int,
           use_fc: bool = False, use_ac3: bool = False,
           max_assignments: int = 1_000_000) -> Result:
-    raise NotImplementedError
+    """Route and wavelength assignment as a CSP. Delegates to csp.solver (see its docstring)."""
+    from csp.solver import solve as _solve
+    return _solve(requests, routes_by_request, W, use_fc, use_ac3, max_assignments)
 
 
 # --- A implements ---------------------------------------------------------
