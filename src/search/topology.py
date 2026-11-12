@@ -38,7 +38,8 @@ def haversine_km(lon1: float, lat1: float, lon2: float, lat2: float) -> float:
 @dataclass(frozen=True)
 class Topology:
     nodes: dict   # node name -> (longitude, latitude)
-    links: dict   # undirected link id (sorted tuple) -> length_km
+    links: dict   # undirected link id (sorted tuple) -> length_km (our haversine value)
+    declared_km: dict | None = None   # germany50 only: the file's own `dist` per link, for cross-checks
 
     def adjacency(self) -> dict:
         """node -> list of (neighbour, length_km), sorted for deterministic order."""
@@ -105,6 +106,49 @@ def parse_sndlib(text: str) -> Topology:
 def load_topology(path) -> Topology:
     """Read and parse an SNDlib native file from disk."""
     return parse_sndlib(Path(path).read_text(encoding="utf-8", errors="replace"))
+
+
+def parse_node_link_json(data: dict) -> Topology:
+    """Parse a networkx node-link JSON network (the TopoHub copy of germany50, plan Step 2.9).
+
+    Nodes are {"id", "name", "pos": [longitude, latitude]}, edges are {"source", "target", "dist"}
+    with source/target given as node ids. Node names are used as node identifiers. Link lengths are
+    recomputed with haversine from the node positions, so that every link cost equals the
+    straight-line distance between its endpoints (this keeps the A* heuristic consistent); the file's
+    own `dist` (km) is kept in `declared_km` for comparison.
+    """
+    by_id = {}
+    nodes = {}
+    for n in data["nodes"]:
+        name = str(n["name"])
+        if name in nodes:
+            raise ValueError(f"duplicate node name {name}")
+        lon, lat = n["pos"]
+        by_id[n["id"]] = name
+        nodes[name] = (float(lon), float(lat))
+    links, declared = {}, {}
+    for e in data["edges"]:
+        try:
+            u, v = by_id[e["source"]], by_id[e["target"]]
+        except KeyError as exc:
+            raise ValueError(f"edge uses unknown node id {exc}") from None
+        if u == v:
+            raise ValueError(f"self-loop on {u}")
+        lid = link_id(u, v)
+        if lid in links:
+            raise ValueError(f"duplicate link {lid}")
+        (lon1, lat1), (lon2, lat2) = nodes[u], nodes[v]
+        links[lid] = haversine_km(lon1, lat1, lon2, lat2)
+        if "dist" in e:
+            declared[lid] = float(e["dist"])
+    return Topology(nodes=nodes, links=links, declared_km=declared or None)
+
+
+def load_germany50(path) -> Topology:
+    """Read the 50-node germany50 network (data/raw/topology/germany50.json)."""
+    import json
+
+    return parse_node_link_json(json.loads(Path(path).read_text(encoding="utf-8")))
 
 
 def write_links_csv(topo: Topology, path) -> None:
