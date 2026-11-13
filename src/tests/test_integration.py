@@ -185,7 +185,7 @@ def test_evidence_request_must_be_dropped_on_abilene(abilene):
     from nn.forecast import forecast
     pl, H, cfg = abilene
     r = plan(pl, 540, forecast(540), K=20, W=4)
-    assert r.iterations[0]["status"] == "no_solution" and r.iterations[1]["k"] == 5
+    assert r.iterations[0]["status"] == "no_solution" and r.iterations[1]["k"] == 5   # one request has a 4th route
     assert len(r.blocked) > 0 and {why for _, why in r.blocked} == {EXHAUSTED}
     assert len(r.assignments) + len(r.blocked) == 20 and independent_check(r, 4)
     m = evaluate(r, H[540])
@@ -207,3 +207,17 @@ def test_abilene_no_future_data_reaches_the_planner(abilene):
         assert a.assignments == b.assignments and [x.id for x in a.requests] == [x.id for x in b.requests]
     finally:
         FC._cache["H"] = saved
+
+
+def test_more_routes_retry_skipped_when_route_lists_unchanged():
+    r = plan(single_route_planner(3), 0, np.array([3.0, 2.0, 1.0]), K=3, W=2)    # only one route per request exists
+    assert [it["note"] for it in r.iterations][0] == "first attempt"
+    assert all(it["note"] != "more routes" for it in r.iterations)
+    assert r.iterations[0]["status"] == "no_solution" and len(r.iterations) == 2     # first attempt + one after the drop
+
+
+def test_strict_timeout_keeps_its_own_status():
+    s = plan(single_route_planner(3), 0, np.array([3.0, 2.0, 1.0]), K=3, W=3, strict=True, max_assignments=1)
+    assert s.status == "timeout" and "Timeout" in s.reason and not s.assignments
+    m = evaluate(s, np.array([3.0, 2.0, 1.0]))
+    assert m["served_share"] == 0.0 and m["blocking_rate"] == 1.0

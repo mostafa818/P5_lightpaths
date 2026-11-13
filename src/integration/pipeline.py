@@ -34,8 +34,8 @@ class PlanResult:
     method: str
     strict: bool
     requests: list                      # the K selected requests, sorted by predicted demand (priority)
-    status: str = "ok"                  # "ok" | "no_solution" (strict mode only)
-    reason: str = ""                    # CSP no-solution message (strict mode failure)
+    status: str = "ok"                  # "ok" | "no_solution" | "timeout" (the last two: strict mode only)
+    reason: str = ""                    # CSP message of the failed solve (strict mode failure)
     assignments: dict = field(default_factory=dict)       # request id -> (route index, wavelength)
     routes_by_request: dict = field(default_factory=dict)  # routes used in the final solve
     blocked: list = field(default_factory=list)            # [(Request, reason)]
@@ -120,7 +120,10 @@ def plan(planner: Planner, t: int, predicted: np.ndarray, K: int, W: int, method
     Normal mode: no solution -> retry with more routes (k = max_routes) -> drop the lowest-priority
     request ("wavelengths exhausted", or "solver timeout") and solve again, until a solution exists.
     Requests without any route within reach are blocked up front ("no route within reach").
-    Strict mode: nothing is dropped or pre-blocked; the CSP's no-solution message is returned.
+    If the k=max_routes lists equal the k=first lists, the "more routes" solve is skipped (it would only
+    repeat the failure); after the first failure the longer lists stay in use for later solves.
+    Strict mode: nothing is dropped or pre-blocked; the CSP's message is returned and a solver timeout
+    keeps status "timeout" (it is not a proof of infeasibility).
     """
     if method not in METHODS:
         raise ValueError(f"unknown method {method!r}; choose from {sorted(METHODS)}")
@@ -161,13 +164,15 @@ def plan(planner: Planner, t: int, predicted: np.ndarray, K: int, W: int, method
         if out.status == "ok":
             break
         if k < planner.routes_max:                             # 5.4: first try more routes
-            k = planner.routes_max
-            routes = {r.id: planner.routes(r, k) for r in active}
-            out = attempt("more routes")
-            if out.status == "ok":
-                break
+            more = {r.id: planner.routes(r, planner.routes_max) for r in active}
+            same = all(more[r.id] == routes[r.id] for r in active)
+            k, routes = planner.routes_max, more               # later solves keep the longer route lists
+            if not same:                                       # identical lists would only repeat the failure
+                out = attempt("more routes")
+                if out.status == "ok":
+                    break
         if strict:                                             # 5.5: no dropping, report the CSP message
-            res.status, res.reason = "no_solution", out.reason or f"solver {out.status}"
+            res.status, res.reason = out.status, out.reason or f"solver {out.status}"   # "no_solution" or "timeout"
             res.total_time = time.perf_counter() - t0
             return res
         victim = max(active, key=lambda r: (-r.demand, r.id))   # lowest predicted demand = lowest priority
