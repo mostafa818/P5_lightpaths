@@ -57,6 +57,13 @@ Honest reading: the NN does **not** beat the last-hour baseline on MAE or RMSE (
 
 Note: the committed `outputs/nn/*.joblib` models only load with the pinned scikit-learn version in `requirements.txt` (1.9.1); regenerate them with `python -m nn.train` (about 10 s, bit-for-bit reproducible) if you change versions. `common.forecast(t)` delegates to `nn.forecast.forecast(t, seed=0)`.
 
+## Integration (Stage 5): `src/integration/pipeline.py`
+`plan(planner, t, predicted, K, W, method="fc+ac3", strict=False)`: forecast -> top-K requests (predicted demand = priority, `Request.id` = pair index) -> `k_routes` (k=3, reach limit) -> `solve(..., precheck=True)`; on failure retry with k=5, then drop the lowest-priority request ("wavelengths exhausted", or "solver timeout" if the solve hit the cap) and solve again until a solution exists. Requests with no route within reach are blocked up front. **Strict mode** never drops or pre-blocks and returns the CSP's no-solution message. Every solve is logged in `PlanResult.iterations` (`PlanResult.log_text()`), every returned assignment is re-validated with `csp.model.is_valid`. `evaluate(result, true_demand)` gives served share, blocking rate and top-K hit rate (true demand of the same hour). Forecast sources: `nn_forecast_fn(seed)` and `last_hour_forecast_fn(H)`.
+
+Findings to report honestly:
+- On Abilene with reach 5,000 km, retrying with k=5 never fixed a failed k=3 solve (0 of 2,688 real instances scanned: K in {5..40}, W in {2..8}, 56 test hours, strict mode); the topology has only 15 links. The "more routes fix it" evidence case (`test_evidence_more_routes_fix_a_failure`) therefore uses a toy network with five link-disjoint routes. The "a request must be dropped" case is real (`test_evidence_request_must_be_dropped_on_abilene`: NN forecast, hour 540, K=20, W=4).
+- The plan's drop rule (always drop the globally lowest-priority request) is conservative: with a static highest-demand-first order the unsolvable core is often among the top requests, so dropping low-priority ones repeats an identical failing search until the prefix that fits is left (hour 540, K=20, W=4: 8 of 20 served, 13 failed solves). It is implemented as the brief describes.
+
 ## Layout
 `config.yaml` (all parameters) | `src/{data,nn,search,csp,integration,eval}/` | `src/common.py` (interface contract) | `src/tests/` | `data/{raw,processed}/` | `outputs/` | `report/` | `docs/`
 
