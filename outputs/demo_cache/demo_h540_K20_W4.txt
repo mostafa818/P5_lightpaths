@@ -1,0 +1,111 @@
+=== INPUT: hour 540, K=20, W=4, method=fc+ac3, forecast=NN (seed 0), strict=False ===
+predicted top-20 pairs (priority order); 'actual' is the real demand of that hour, shown for comparison only
+  rank  pair              predicted     actual  in true top-20
+     1  WASHng->ATLAng       148.5M     239.6M  yes
+     2  LOSAng->NYCMng        98.1M      90.4M  yes
+     3  CHINng->NYCMng        97.8M     104.5M  yes
+     4  WASHng->NYCMng        96.0M      81.5M  yes
+     5  NYCMng->CHINng        91.2M      60.8M  yes
+     6  WASHng->LOSAng        91.2M      90.5M  yes
+     7  LOSAng->WASHng        77.0M      78.5M  yes
+     8  NYCMng->LOSAng        67.7M      55.5M  yes
+     9  WASHng->CHINng        55.5M      52.6M  yes
+    10  WASHng->DNVRng        52.2M      49.3M  yes
+    11  WASHng->IPLSng        51.1M      41.4M  yes
+    12  CHINng->LOSAng        46.1M      38.8M  yes
+    13  NYCMng->WASHng        44.3M      35.2M  yes
+    14  IPLSng->NYCMng        41.5M      41.3M  yes
+    15  DNVRng->IPLSng        40.5M      25.1M  no
+    16  DNVRng->WASHng        39.2M      44.1M  yes
+    17  IPLSng->LOSAng        37.1M      18.2M  no
+    18  CHINng->WASHng        36.7M      23.0M  no
+    19  SNVAng->LOSAng        35.8M      32.3M  yes
+    20  LOSAng->STTLng        33.4M      36.0M  yes
+
+=== FEEDBACK LOOP (14 solves) ===
+hour 540  K=20  W=4  method=fc+ac3  strict=False
+  iter 1: k=3 requests=20 -> no_solution (assignments 7248, backtracks 3505) [first attempt] No solution: wavelengths exhausted (no conflict-free assignment with W=4)
+  iter 2: k=5 requests=20 -> no_solution (assignments 7248, backtracks 3505) [more routes] No solution: wavelengths exhausted (no conflict-free assignment with W=4)
+  iter 3: k=5 requests=19 -> no_solution (assignments 7248, backtracks 3505) [after dropping id 86] No solution: wavelengths exhausted (no conflict-free assignment with W=4)
+  iter 4: k=5 requests=18 -> no_solution (assignments 7248, backtracks 3505) [after dropping id 106] No solution: wavelengths exhausted (no conflict-free assignment with W=4)
+  iter 5: k=5 requests=17 -> no_solution (assignments 7248, backtracks 3505) [after dropping id 32] No solution: wavelengths exhausted (no conflict-free assignment with W=4)
+  iter 6: k=5 requests=16 -> no_solution (assignments 7248, backtracks 3505) [after dropping id 61] No solution: wavelengths exhausted (no conflict-free assignment with W=4)
+  iter 7: k=5 requests=15 -> no_solution (assignments 7248, backtracks 3505) [after dropping id 43] No solution: wavelengths exhausted (no conflict-free assignment with W=4)
+  iter 8: k=5 requests=14 -> no_solution (assignments 7248, backtracks 3505) [after dropping id 37] No solution: wavelengths exhausted (no conflict-free assignment with W=4)
+  iter 9: k=5 requests=13 -> no_solution (assignments 7248, backtracks 3505) [after dropping id 62] No solution: wavelengths exhausted (no conflict-free assignment with W=4)
+  iter 10: k=5 requests=12 -> no_solution (assignments 7248, backtracks 3505) [after dropping id 98] No solution: wavelengths exhausted (no conflict-free assignment with W=4)
+  iter 11: k=5 requests=11 -> no_solution (assignments 7248, backtracks 3505) [after dropping id 28] No solution: wavelengths exhausted (no conflict-free assignment with W=4)
+  iter 12: k=5 requests=10 -> no_solution (assignments 7248, backtracks 3505) [after dropping id 126] No solution: wavelengths exhausted (no conflict-free assignment with W=4)
+  iter 13: k=5 requests=9 -> no_solution (assignments 7248, backtracks 3505) [after dropping id 124] No solution: wavelengths exhausted (no conflict-free assignment with W=4)
+  iter 14: k=5 requests=8 -> ok (assignments 3840, backtracks 1912) [after dropping id 123]
+  blocked: LOSAng->STTLng (id 86, predicted 33.4 Mbps): wavelengths exhausted
+  blocked: SNVAng->LOSAng (id 106, predicted 35.8 Mbps): wavelengths exhausted
+  blocked: CHINng->WASHng (id 32, predicted 36.7 Mbps): wavelengths exhausted
+  blocked: IPLSng->LOSAng (id 61, predicted 37.1 Mbps): wavelengths exhausted
+  blocked: DNVRng->WASHng (id 43, predicted 39.2 Mbps): wavelengths exhausted
+  blocked: DNVRng->IPLSng (id 37, predicted 40.5 Mbps): wavelengths exhausted
+  blocked: IPLSng->NYCMng (id 62, predicted 41.5 Mbps): wavelengths exhausted
+  blocked: NYCMng->WASHng (id 98, predicted 44.3 Mbps): wavelengths exhausted
+  blocked: CHINng->LOSAng (id 28, predicted 46.1 Mbps): wavelengths exhausted
+  blocked: WASHng->IPLSng (id 126, predicted 51.1 Mbps): wavelengths exhausted
+  blocked: WASHng->DNVRng (id 124, predicted 52.2 Mbps): wavelengths exhausted
+  blocked: WASHng->CHINng (id 123, predicted 55.5 Mbps): wavelengths exhausted
+  result: ok, served 8/20
+
+=== ROUTES ===
+  WASHng->ATLAng: 3 candidate route(s) within reach
+       [0] WASHng-ATLAng  899 km
+     * [1] WASHng-NYCMng-CHINng-IPLSng-ATLAng  2329 km
+       [2] WASHng-NYCMng-CHINng-IPLSng-KSCYng-HSTNng-ATLAng  4746 km
+  LOSAng->NYCMng: 1 candidate route(s) within reach
+     * [0] LOSAng-HSTNng-ATLAng-WASHng-NYCMng  4506 km
+  CHINng->NYCMng: 3 candidate route(s) within reach
+     * [0] CHINng-NYCMng  1145 km
+       [1] CHINng-IPLSng-ATLAng-WASHng-NYCMng  2083 km
+       [2] CHINng-IPLSng-KSCYng-HSTNng-ATLAng-WASHng-NYCMng  4501 km
+  WASHng->NYCMng: 2 candidate route(s) within reach
+     * [0] WASHng-NYCMng  335 km
+       [1] WASHng-ATLAng-IPLSng-CHINng-NYCMng  2893 km
+  NYCMng->CHINng: 3 candidate route(s) within reach
+     * [0] NYCMng-CHINng  1145 km
+       [1] NYCMng-WASHng-ATLAng-IPLSng-CHINng  2083 km
+       [2] NYCMng-WASHng-ATLAng-HSTNng-KSCYng-IPLSng-CHINng  4501 km
+  WASHng->LOSAng: 1 candidate route(s) within reach
+     * [0] WASHng-ATLAng-HSTNng-LOSAng  4171 km
+  LOSAng->WASHng: 1 candidate route(s) within reach
+     * [0] LOSAng-HSTNng-ATLAng-WASHng  4171 km
+  NYCMng->LOSAng: 1 candidate route(s) within reach
+     * [0] NYCMng-WASHng-ATLAng-HSTNng-LOSAng  4506 km
+
+=== ASSIGNMENT TABLE ===
+  pair                demand  wavelength      km  route
+  WASHng->ATLAng      148.5M           0    2329  WASHng-NYCMng-CHINng-IPLSng-ATLAng
+  LOSAng->NYCMng       98.1M           1    4506  LOSAng-HSTNng-ATLAng-WASHng-NYCMng
+  CHINng->NYCMng       97.8M           1    1145  CHINng-NYCMng
+  WASHng->NYCMng       96.0M           2     335  WASHng-NYCMng
+  NYCMng->CHINng       91.2M           2    1145  NYCMng-CHINng
+  WASHng->LOSAng       91.2M           0    4171  WASHng-ATLAng-HSTNng-LOSAng
+  LOSAng->WASHng       77.0M           2    4171  LOSAng-HSTNng-ATLAng-WASHng
+  NYCMng->LOSAng       67.7M           3    4506  NYCMng-WASHng-ATLAng-HSTNng-LOSAng
+
+=== BLOCKED (12) ===
+  LOSAng->STTLng (predicted 33.4 Mbps): wavelengths exhausted
+  SNVAng->LOSAng (predicted 35.8 Mbps): wavelengths exhausted
+  CHINng->WASHng (predicted 36.7 Mbps): wavelengths exhausted
+  IPLSng->LOSAng (predicted 37.1 Mbps): wavelengths exhausted
+  DNVRng->WASHng (predicted 39.2 Mbps): wavelengths exhausted
+  DNVRng->IPLSng (predicted 40.5 Mbps): wavelengths exhausted
+  IPLSng->NYCMng (predicted 41.5 Mbps): wavelengths exhausted
+  NYCMng->WASHng (predicted 44.3 Mbps): wavelengths exhausted
+  CHINng->LOSAng (predicted 46.1 Mbps): wavelengths exhausted
+  WASHng->IPLSng (predicted 51.1 Mbps): wavelengths exhausted
+  WASHng->DNVRng (predicted 52.2 Mbps): wavelengths exhausted
+  WASHng->CHINng (predicted 55.5 Mbps): wavelengths exhausted
+
+=== SUMMARY === served 8/20  served share 0.628  blocking rate 0.600  top-K hit rate 0.85  CSP assignments 98064 backtracks 47477  solver time 0.129s
+
+=== FIGURES ===
+   outputs/demo_cache/demo_topology_h540_K20_W4.png
+   outputs/demo_cache/demo_heatmap_h540_K20_W4.png
+   outputs/demo_cache/demo_nn_effect.png
+   CSP domain-size figure (plot c) is Member B's part, not merged yet.

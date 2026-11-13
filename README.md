@@ -64,6 +64,20 @@ Findings to report honestly:
 - On Abilene with reach 5,000 km, retrying with k=5 never fixed a failed k=3 solve (0 of 2,688 real instances scanned: K in {5..40}, W in {2..8}, 56 test hours, strict mode); the topology has only 15 links. The "more routes fix it" evidence case (`test_evidence_more_routes_fix_a_failure`) therefore uses a toy network with five link-disjoint routes. The "a request must be dropped" case is real (`test_evidence_request_must_be_dropped_on_abilene`: NN forecast, hour 540, K=20, W=4).
 - The plan's drop rule (always drop the globally lowest-priority request) is conservative: with a static highest-demand-first order the unsolvable core is often among the top requests, so dropping low-priority ones repeats an identical failing search until the prefix that fits is left (hour 540, K=20, W=4: 8 of 20 served, 13 failing solves that all report the identical counts; Member B suggested dropping the lowest-priority request *involved in the conflict* instead as a separately reported variant). It is implemented as the brief describes.
 
+## Demo (Stage 6, Member A part): `run_demo.py`
+```
+python run_demo.py                                    # hour 540, K=20, W=8, FC+AC-3, NN forecast: all 20 served
+python run_demo.py --W 4 --plots                      # feedback loop: 8 of 20 served, figures in outputs/
+python run_demo.py --nn off --W 4                     # last-hour forecast instead of the NN
+python run_demo.py --W 4 --strict                     # no dropping: prints the CSP no-solution message
+python run_demo.py --method bt|fc|fc+ac3 --routes all|chosen|none --hour H --K K --W W --seed S --outdir DIR
+python run_demo.py --trace [--src X --dst Y]          # UCS vs A* expansion trace (needs Member B's search.trace)
+python -m eval.nn_effect --K 20 --W 4 8 --seeds 0     # NN vs last-hour inside the planner (data for figure d), ~2 min
+```
+It prints: the predicted top-K list (with the actual demand of that hour for comparison only), the feedback-loop log, the routes, the assignment table, the blocked requests with reasons and a summary line. Figures (`src/eval/plots.py`): (a) topology at real coordinates with every served route coloured by wavelength, (b) link x wavelength heatmap (cell = priority rank of the request using it; a clash would fail an assertion), (d) NN vs last-hour bar chart. Plot (c), CSP domain sizes, and the trace are Member B's part (issue #7). Cached outputs for the live demo (plan 11.2) are in `outputs/demo_cache/` (text and figures for hour 540, K=20, W=8 and W=4, and NN off).
+
+NN on vs off inside the planner (test week, K=20, 1 NN seed, 168 hours; `outputs/nn_effect.json`): W=4 served share 0.598 (NN) vs 0.598 (last hour), blocking rate 0.587 vs 0.581; W=8 served share 0.946 vs 0.943, blocking 0.000 for both. As at forecast level, the NN gives no practical gain over last-hour. Experiment 3 repeats this with 5 seeds.
+
 ## Layout
 `config.yaml` (all parameters) | `src/{data,nn,search,csp,integration,eval}/` | `src/common.py` (interface contract) | `src/tests/` | `data/{raw,processed}/` | `outputs/` | `report/` | `docs/`
 
