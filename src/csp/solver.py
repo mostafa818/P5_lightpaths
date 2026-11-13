@@ -8,6 +8,10 @@
     delete from every later neighbour the values that share a link with that route and use the same
     wavelength; an emptied domain undoes the assignment at once. A trail restores the deletions;
   * ``use_ac3``: AC-3 once before the search. BT+FC+AC-3 means AC-3 as preprocessing and FC inside.
+  * ``precheck`` (off by default, not one of the three compared parts): before any search, count the requests
+    forced through each link; more than W on one link is provably unsolvable, so return the "wavelengths
+    exhausted on link X-Y" message at once with 0 assignments and 0 backtracks. It never changes the answer,
+    only how fast an unsolvable instance is reported. The integration loop uses ``precheck=True``.
 All variants use the same orders, so they differ only in speed, never in the answer they find.
 
 Counters (``common.Stats``, defined in the README):
@@ -125,7 +129,7 @@ def _search(m: Model, dom: list, stats: Stats, use_fc: bool, cap: int):
 
 
 def solve(requests: list, routes_by_request: dict, W: int, use_fc: bool = False,
-          use_ac3: bool = False, max_assignments: int = 1_000_000) -> Result:
+          use_ac3: bool = False, max_assignments: int = 1_000_000, precheck: bool = False) -> Result:
     """Assign a (route, wavelength) to every request, or report why that is impossible.
 
     ``routes_by_request`` maps request id -> list of ``Route``; the returned assignment maps request id ->
@@ -144,6 +148,10 @@ def solve(requests: list, routes_by_request: dict, W: int, use_fc: bool = False,
     m = Model(requests, routes_by_request, W)
     if m.n == 0:
         return finish({})
+    if precheck:
+        overload = m.forced_overload()
+        if overload:
+            return finish(None, overload, "no_solution")
     dom = m.initial_domains()
     if use_ac3 and not ac3(m, dom):
         return finish(None, m.explain_failure(), "no_solution")

@@ -61,9 +61,10 @@ class Model:
         """values[v] = (sorted route position, wavelength) -> {request id: (original route index, wavelength)}."""
         return {self.requests[v].id: (self.orig[v][r], w) for v, (r, w) in enumerate(values)}
 
-    def explain_failure(self) -> str:
-        """Clear no-solution message. If more requests are forced through one link (every one of their
-        routes uses it) than there are wavelengths, name that link; otherwise a generic message."""
+    def forced_overload(self):
+        """If more requests are forced through one link (every one of their routes uses it) than there are
+        wavelengths, return the no-solution message naming that link; otherwise None. Such an instance can
+        never be solved, whatever the other requests do."""
         forced: dict = {}
         for v in range(self.n):
             if not self.routes[v]:
@@ -74,7 +75,12 @@ class Model:
         if over:
             _, lid = min(over)                      # most requests first, then smallest link id
             return f"No solution: wavelengths exhausted on link {lid[0]}-{lid[1]}"
-        return f"No solution: wavelengths exhausted (no conflict-free assignment with W={self.W})"
+        return None
+
+    def explain_failure(self) -> str:
+        """Clear no-solution message: the overloaded link if there is one, otherwise a generic message."""
+        return self.forced_overload() or \
+            f"No solution: wavelengths exhausted (no conflict-free assignment with W={self.W})"
 
 
 def validate(requests, solution: dict, W: int, routes_by_request: dict,

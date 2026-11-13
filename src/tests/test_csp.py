@@ -345,3 +345,51 @@ def test_real_abilene_instances_all_variants_agree_and_are_valid(abilene, reach_
             else:
                 assert r.reason.startswith("No solution")
         assert len({json.dumps(r.assignment, sort_keys=True) for r in done.values()}) == 1
+
+
+# ---- optional precheck (requested by Member A) --------------------------------------------------------------------
+@pytest.mark.parametrize("variant", VARIANTS)
+def test_precheck_failure_reports_zero_work_and_the_same_message(variant):
+    rs = [req(1, 3), req(2, 2), req(3, 1)]
+    routes = {i: [route(10, "XY", "YZ")] for i in (1, 2, 3)}
+    off = run(rs, routes, 2, variant)
+    on = run(rs, routes, 2, variant, precheck=True)
+    assert (on.status, on.assignment, on.reason) == (off.status, off.assignment, off.reason)
+    assert on.reason == "No solution: wavelengths exhausted on link X-Y"
+    assert on.stats.assignments == 0 and on.stats.backtracks == 0
+
+
+@pytest.mark.parametrize("variant", VARIANTS)
+def test_precheck_never_changes_the_answer(variant):
+    rng = random.Random(7)
+    seen_fail = seen_ok = 0
+    for _ in range(400):
+        rs, routes = random_instance(rng, rng.randint(1, 6), 3)
+        W = rng.randint(1, 3)
+        off = run(rs, routes, W, variant)
+        on = run(rs, routes, W, variant, precheck=True)
+        assert (on.status, on.assignment, on.reason) == (off.status, off.assignment, off.reason)
+        assert on.stats.assignments <= off.stats.assignments
+        seen_fail += on.status != "ok"
+        seen_ok += on.status == "ok"
+    assert seen_fail > 40 and seen_ok > 40
+
+
+@pytest.mark.parametrize("variant", ["BT", "BT+FC"])
+def test_precheck_turns_a_timeout_into_an_instant_proof(variant):
+    # Five requests with three disjoint routes each (a big search space) plus three low-priority requests that
+    # all must use link X-Y; with W = 2 that is impossible, but the search only meets it at the very end.
+    rs = [req(i, 100 - i) for i in range(5)] + [req(10 + i, 1) for i in range(3)]
+    routes = {i: [route(1, f"a{i}"), route(2, f"b{i}"), route(3, f"c{i}")] for i in range(5)}
+    routes.update({10 + i: [route(1, "XY")] for i in range(3)})
+    slow = run(rs, routes, 2, variant, max_assignments=50)
+    fast = run(rs, routes, 2, variant, max_assignments=50, precheck=True)
+    assert slow.status == "timeout"
+    assert fast.status == "no_solution" and fast.stats.assignments == 0
+
+
+def test_common_solve_passes_precheck_through():
+    rs = [req(i) for i in (1, 2, 3)]
+    routes = {i: [route(10, "XY")] for i in (1, 2, 3)}
+    res = common.solve(rs, routes, 2, precheck=True)
+    assert res.stats.assignments == 0 and res.reason == "No solution: wavelengths exhausted on link X-Y"
