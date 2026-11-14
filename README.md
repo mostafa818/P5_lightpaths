@@ -12,7 +12,7 @@ Commands (filled in as stages are completed):
 ```
 python make_data.py
 python run_demo.py ...
-python -m eval.run_experiments
+python -m eval.run_experiments            # all experiments; or: python -m eval.run_experiments exp1 exp2
 pytest
 ```
 
