@@ -39,6 +39,10 @@ def main():
             sel = [r for r in rows if r["source"] == src]
             print(f"K={a.K} W={W} {src:9s} served {np.mean([r['served_share'] for r in sel]):.3f} "
                   f"blocking {np.mean([r['blocking_rate'] for r in sel]):.3f} hit {np.mean([r['topk_hit_rate'] for r in sel]):.3f}")
+        from eval.plots import paired_differences
+        pd_ = paired_differences(rows)
+        print("  paired NN - last hour (mean +- s.e. over hours): " +
+              ", ".join(f"{k} {m:+.4f} +- {s:.4f}" for k, (m, s, _) in pd_.items()))
         print(f"  ({time.time() - t0:.0f}s)")
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
     json.dump(out, open(a.out, "w"))

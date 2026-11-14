@@ -102,7 +102,7 @@ hour 540  K=20  W=4  method=fc+ac3  strict=False
   WASHng->DNVRng (predicted 52.2 Mbps): wavelengths exhausted
   WASHng->CHINng (predicted 55.5 Mbps): wavelengths exhausted
 
-=== SUMMARY === served 8/20  served share 0.628  blocking rate 0.600  top-K hit rate 0.85  CSP assignments 98064 backtracks 47477  solver time 0.129s
+=== SUMMARY === served 8/20  served share 0.628  blocking rate 0.600  top-K hit rate 0.85  CSP assignments 98064 backtracks 47477  solver time 0.110s
 
 === FIGURES ===
    outputs/demo_cache/demo_topology_h540_K20_W4.png

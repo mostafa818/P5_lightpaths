@@ -136,3 +136,20 @@ def test_nn_effect_harness_small_run():
     assert len(rows) == 4 and {r["source"] for r in rows} == {"nn", "last_hour"}
     for r in rows:
         assert 0 <= r["served_share"] <= 1 and 0 <= r["blocking_rate"] <= 1 and 0 <= r["topk_hit_rate"] <= 1
+
+
+def test_paired_differences_hand_computed():
+    rows = []
+    for h, (nn, lh) in enumerate([(0.9, 0.8), (0.7, 0.8), (0.8, 0.6)]):          # per-hour served share
+        rows.append({"source": "last_hour", "seed": -1, "hour": h, "served_share": lh, "blocking_rate": 0.0, "topk_hit_rate": 1.0})
+        for s in (0, 1):
+            rows.append({"source": "nn", "seed": s, "hour": h, "served_share": nn, "blocking_rate": 0.0, "topk_hit_rate": 1.0})
+    pd = plots.paired_differences(rows)
+    diffs = np.array([0.1, -0.1, 0.2])
+    mean, se, n = pd["served_share"]
+    assert n == 3 and mean == pytest.approx(diffs.mean()) and se == pytest.approx(diffs.std(ddof=1) / np.sqrt(3))
+    assert pd["blocking_rate"] == (0.0, 0.0, 3)
+
+
+def test_wavelength_palette_has_distinct_colours_up_to_eight():
+    assert len(set(plots._colors(8))) == 8 and len(set(plots._colors(12))) == 12
