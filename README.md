@@ -101,3 +101,7 @@ Branches `member-a/...` and `member-b/...`; merge via pull request reviewed by t
 
 ## Limitations
 (to be completed in Stage 9)
+
+## Search trace and CSP domain sizes (Stage 6, Member B)
+- `src/search/trace.py`: `expansion_trace(graph, src, dst, algo)` ("ucs", "astar", "bfs") returns the expansion order, path, cost and the same counters as Experiment 1; `format_trace(ucs, astar)` prints the two traces side by side. Good demo pair: `KSCYng -> LOSAng` (UCS expands 12 nodes, A* 4, same 2,762 km path).
+- `src/csp/analysis.py`: `domain_sizes(requests, routes_by_request, W, fc_steps=1)` gives per request (priority order) the domain size initially, after AC-3 and after forward checking following the first `fc_steps` assignments. `python -m eval.plot_csp` writes `outputs/csp_domains.png` for hour 540, K=20, W=4 (forward checking prunes, AC-3 prunes nothing) and K=10, W=1 (AC-3 empties a domain: unsolvable with 0 assignments).
