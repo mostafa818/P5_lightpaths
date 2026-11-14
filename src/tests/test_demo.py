@@ -122,10 +122,29 @@ def test_demo_rejects_hour_without_history():
 
 
 @needs_abilene
-def test_demo_plots_and_trace_hook(capsys, tmp_path):
-    out = run_demo(["--W", "4", "--plots", "--trace", "--outdir", str(tmp_path)], capsys)
-    assert "=== SEARCH TRACE" in out and "=== FIGURES" in out
-    for f in ("demo_topology_h540_K20_W4.png", "demo_heatmap_h540_K20_W4.png"):
+def test_demo_trace_default_pair(capsys):
+    out = run_demo(["--K", "10", "--trace"], capsys)
+    assert "SEARCH TRACE (UCS vs A*), KSCYng -> LOSAng" in out
+    assert "UCS: expanded 12, generated 13, cost 2762 km" in out and "A* : expanded 4, generated 7, cost 2762 km" in out
+    assert "A* expanded 8 fewer nodes" in out
+
+
+@needs_abilene
+def test_demo_trace_custom_pair_and_bad_nodes(capsys):
+    out = run_demo(["--K", "10", "--trace", "--src", "CHINng", "--dst", "LOSAng"], capsys)
+    assert "CHINng -> LOSAng" in out and "same cost" in out
+    for bad in (["--src", "NOPE"], ["--src", "KSCYng", "--dst", "KSCYng"]):
+        with pytest.raises(SystemExit) as e:
+            run_demo(["--K", "10", "--trace"] + bad, capsys)
+        assert "two different Abilene nodes" in str(e.value)
+        assert "=== INPUT" not in capsys.readouterr().out                  # failed fast, before the report
+
+
+@needs_abilene
+def test_demo_plots_include_csp_domain_figure(capsys, tmp_path):
+    out = run_demo(["--W", "4", "--plots", "--outdir", str(tmp_path)], capsys)
+    assert "=== FIGURES" in out and "not merged yet" not in out
+    for f in ("demo_topology_h540_K20_W4.png", "demo_heatmap_h540_K20_W4.png", "demo_csp_domains_h540.png"):
         valid_png(str(tmp_path / f))
 
 

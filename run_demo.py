@@ -3,7 +3,8 @@
   python run_demo.py                                   # hour 540, K=20, W=8, FC+AC-3, NN forecast
   python run_demo.py --hour 540 --K 20 --W 4 --plots   # feedback loop (requests dropped) + figures in outputs/
   python run_demo.py --nn off                          # last-hour forecast instead of the NN
-  python run_demo.py --trace --src CHINng --dst LOSAng # UCS vs A* expansion trace (Member B's search.trace)
+  python run_demo.py --trace                           # UCS vs A* expansion trace (default pair KSCYng -> LOSAng)
+  python run_demo.py --trace --src CHINng --dst LOSAng # trace for another pair
 """
 import argparse, os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
@@ -26,10 +27,15 @@ def main():
     ap.add_argument("--plots", action="store_true", help="write the figures (default folder: outputs/)")
     ap.add_argument("--outdir", default=None, help="folder for the figures (default: outputs/)")
     ap.add_argument("--trace", action="store_true", help="print the UCS vs A* expansion trace")
-    ap.add_argument("--src"); ap.add_argument("--dst")
+    ap.add_argument("--src", help="trace source node (default KSCYng)"); ap.add_argument("--dst", help="trace destination node (default LOSAng)")
     a = ap.parse_args()
 
     planner, H, cfg = default_planner()
+    if a.trace:                                                   # validate before the (long) report is printed
+        known = set(planner.graph.nodes)
+        t_src, t_dst = a.src or "KSCYng", a.dst or "LOSAng"
+        if t_src not in known or t_dst not in known or t_src == t_dst:
+            sys.exit(f"--src/--dst must be two different Abilene nodes: {sorted(known)}")
     lo, hi = cfg["split"]["test_hours"]
     if not (168 <= a.hour <= hi):
         sys.exit(f"hour must be in 168..{hi} (needs 168 h of history; test week is {lo}-{hi})")
@@ -79,17 +85,11 @@ def main():
           f"CSP assignments {m['assignments']} backtracks {m['backtracks']}  solver time {m['solver_time']:.3f}s")
 
     if a.trace:
-        print("\n=== SEARCH TRACE (UCS vs A*) ===")
-        try:
-            from search.trace import expansion_trace, format_trace
-        except ImportError:
-            print("  search.trace is not available yet (Member B's part of Stage 6, see issue #7).")
-        else:
-            src = a.src or result.requests[0].src
-            dst = a.dst or result.requests[0].dst
-            print(f"  request {src} -> {dst}")
-            print(format_trace(expansion_trace(planner.graph, src, dst, "ucs"),
-                               expansion_trace(planner.graph, src, dst, "astar")))
+        from search.trace import expansion_trace, format_trace
+        src, dst = a.src or "KSCYng", a.dst or "LOSAng"          # default pair: the biggest A* saving on Abilene
+        print(f"\n=== SEARCH TRACE (UCS vs A*), {src} -> {dst} ===")
+        print(format_trace(expansion_trace(planner.graph, src, dst, "ucs"),
+                           expansion_trace(planner.graph, src, dst, "astar")))
 
     if a.plots:
         from eval import plots
@@ -110,11 +110,8 @@ def main():
             print("  ", plots.plot_nn_effect(data, os.path.join(out, "demo_nn_effect.png")))
         else:
             print("   NN on/off figure needs: python -m eval.nn_effect --K 20 --W 4 8 --seeds 0")
-        try:
-            from eval import plot_csp                                  # Member B's plot (c), when merged
-            print("   CSP domain-size figure: see eval.plot_csp (Member B)")
-        except ImportError:
-            print("   CSP domain-size figure (plot c) is Member B's part, not merged yet.")
+        from eval.plot_csp import make_plot, demo_panels           # Member B's plot (c): domain sizes
+        print("  ", make_plot(demo_panels(a.hour), os.path.join(out, f"demo_csp_domains_h{a.hour}.png")))
 
 
 if __name__ == "__main__":

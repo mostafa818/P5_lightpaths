@@ -77,4 +77,4 @@ hour 540  K=20  W=4  method=fc+ac3  strict=False
   WASHng->CHINng (predicted 57.8 Mbps): wavelengths exhausted
   WASHng->IPLSng (predicted 66.6 Mbps): wavelengths exhausted
 
-=== SUMMARY === served 8/20  served share 0.628  blocking rate 0.600  top-K hit rate 0.85  CSP assignments 147200 backtracks 81829  solver time 0.231s
+=== SUMMARY === served 8/20  served share 0.628  blocking rate 0.600  top-K hit rate 0.85  CSP assignments 147200 backtracks 81829  solver time 0.266s

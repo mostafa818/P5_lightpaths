@@ -123,8 +123,26 @@ hour 540  K=20  W=8  method=fc+ac3  strict=False
 
 === SUMMARY === served 20/20  served share 0.919  blocking rate 0.000  top-K hit rate 0.85  CSP assignments 20 backtracks 0  solver time 0.001s
 
+=== SEARCH TRACE (UCS vs A*), KSCYng -> LOSAng ===
+step  UCS (h = 0)  A* (haversine h)
+   1  KSCYng *     KSCYng *
+   2  DNVRng *     DNVRng *
+   3  IPLSng       SNVAng *
+   4  HSTNng       LOSAng *
+   5  CHINng       -
+   6  ATLAng       -
+   7  ATLAM5       -
+   8  SNVAng *     -
+   9  NYCMng       -
+  10  STTLng       -
+  11  WASHng       -
+  12  LOSAng *     -
+UCS: expanded 12, generated 13, cost 2762 km, path KSCYng-DNVRng-SNVAng-LOSAng
+A* : expanded 4, generated 7, cost 2762 km, path KSCYng-DNVRng-SNVAng-LOSAng
+(* = on the final path; A* expanded 8 fewer nodes for the same cost)
+
 === FIGURES ===
    outputs/demo_cache/demo_topology_h540_K20_W8.png
    outputs/demo_cache/demo_heatmap_h540_K20_W8.png
    outputs/demo_cache/demo_nn_effect.png
-   CSP domain-size figure (plot c) is Member B's part, not merged yet.
+   outputs/demo_cache/demo_csp_domains_h540.png
