@@ -43,7 +43,7 @@ def ac3_pruned_share(m: Model) -> float:
 
 def instance(planner, t: int, K: int, pred: np.ndarray) -> tuple:
     reqs = select_requests(pred, planner.pairs, K)
-    return reqs, {r.id: planner.routes(r, 3) for r in reqs}
+    return reqs, {r.id: planner.routes(r, CFG["rwa"]["routes_per_request"]) for r in reqs}
 
 
 def run(source: str = "nn", ks=None, ws=None) -> pd.DataFrame:
@@ -62,7 +62,7 @@ def run(source: str = "nn", ks=None, ws=None) -> pd.DataFrame:
                 for name, (use_fc, use_ac3) in METHODS.items():
                     res = solve(reqs, routes, W, use_fc=use_fc, use_ac3=use_ac3, max_assignments=CAP, precheck=False)
                     if res.status == "ok":
-                        assert is_valid(reqs, res.assignment, W, routes, 5000, require_all=True)
+                        assert is_valid(reqs, res.assignment, W, routes, CFG["rwa"]["reach_km"], require_all=True)
                     statuses[name] = res.status
                     rows.append(dict(source=source, hour=t, K=K, W=W, method=name, status=res.status,
                                      assignments=res.stats.assignments, backtracks=res.stats.backtracks,

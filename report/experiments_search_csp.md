@@ -59,12 +59,13 @@ assignments. A true-demand run and a small-W run (W = 1, 2) are in `exp2_csp_sum
 - **K = 40, W = 8 hits the cap in all 10 hours for all three methods.** The instance is unsolvable in these hours (ten
   or more requests are forced through one link, with only 8 wavelengths), but the search cannot see this and runs to the
   cap. The `precheck` option proves it instantly with 0 assignments. FC is about 5x faster than BT per
-  assignment at the cap (about 2.1 s vs 11.7 s per run) because it avoids re-checking every earlier neighbour.
+  assignment at the cap (NN-forecast rows, my run: about 2.1 s vs 11.7 s per run; Member A's independent rerun gave 1.8 s vs 10.6 s, so absolute times are machine-dependent and the ratio is about 5.5x) because it avoids re-checking every earlier neighbour.
 - **W = 4 is nearly always infeasible with the full route set in this setting:** only 1 of 10 hours is solvable at K = 10 and none at K = 20 or 40 (3 of 10 with true demand at K = 10). This matters for Experiment 3: its settings need to
   allow the planner to serve a useful share (K = 10 or W = 8).
 
 ## Limits of these results
 
+- The spread in Experiment 2 is the standard deviation over the 10 hours with a single NN seed (seed 0), not over seeds; Experiment 3 reports the 5-seed spread.
 - 10 hours is a small sample; the standard deviations are large because instance difficulty varies a lot between hours.
 - Timeout rows are lower bounds, not means; plain BT's counts at K = 40, W = 8 are only the cap.
 - Search times are microseconds and CPU-dependent. Counters are the primary measure.
