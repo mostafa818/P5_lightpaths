@@ -12,7 +12,7 @@ Commands (filled in as stages are completed):
 ```
 python make_data.py
 python run_demo.py ...
-python -m eval.run_experiments            # all experiments; or: python -m eval.run_experiments exp1 exp2
+python -m eval.run_experiments            # all experiments; or: python -m eval.run_experiments exp1 exp2 exp3
 pytest
 ```
 
@@ -76,7 +76,21 @@ python -m eval.nn_effect --K 20 --W 4 8 --seeds 0     # NN vs last-hour inside t
 ```
 It prints: the predicted top-K list (with the actual demand of that hour for comparison only), the feedback-loop log, the routes, the assignment table, the blocked requests with reasons and a summary line. Figures (`src/eval/plots.py`): (a) topology at real coordinates with every served route coloured by wavelength (colour-blind-safe Okabe-Ito palette, one lateral lane per wavelength so shared links stay readable), (b) link x wavelength heatmap (cell = priority rank of the request using it; a clash would fail an assertion), (d) NN vs last-hour bar chart with a paired-difference row. Plot (c), CSP domain sizes, and the trace are Member B's part (issue #7). Cached outputs for the live demo (plan 11.2) are in `outputs/demo_cache/` (text and figures for hour 540, K=20, W=8 and W=4, and NN off).
 
-NN on vs off inside the planner (test week, K=20, 1 NN seed, 168 hours; `outputs/nn_effect.json`): W=4 served share 0.598 (NN) vs 0.598 (last hour), blocking rate 0.587 vs 0.581; W=8 served share 0.946 vs 0.943, blocking 0.000 for both. Paired per-hour differences NN minus last-hour (+- s.e. over the 168 hours; figure d, bottom row): W=4 served share +0.0002 +- 0.0041, blocking rate +0.0060 +- 0.0028 (the NN blocks slightly *more*, about 2 s.e.), top-K hit +0.0030 +- 0.0028; W=8 served share +0.0034 +- 0.0022, top-K hit +0.0030 +- 0.0028. So the NN gives no gain over last-hour, and at W=4 its blocking is slightly worse. Experiment 3 repeats this with 5 seeds and reports the paired differences.
+NN on vs off inside the planner: the full result (5 NN seeds) is Experiment 3, below. `python -m eval.nn_effect` is the underlying harness (1 seed by default, ~2 min); `run_demo.py --plots` draws figure (d) from `outputs/nn_effect.json`, which Experiment 3 writes.
+
+## Experiment 3 (Member A): NN vs last-hour forecast inside the planner
+`python -m eval.run_experiments exp3` (about 6 minutes; resumable, finished chunks are kept in `outputs/experiments/.exp3_chunks/`; `python -m eval.exp3_nn --reuse` rebuilds the tables and figure from `outputs/experiments/exp3_nn_raw.csv`). Setup: 168 test hours x 5 NN seeds (and the deterministic last-hour forecast), K=20, planner BT+FC+AC-3 with precheck, cap 1,000,000 assignments, 3 routes (5 on retry), reach 5,000 km. Files: `outputs/experiments/exp3_nn_raw.csv`, `exp3_nn_summary.md`, `exp3_nn.png`.
+
+| | metric | last-hour | NN (mean +- std over 5 seeds) | NN minus last-hour, paired | 95% block-bootstrap CI |
+|---|---|---|---|---|---|
+| W=4 | served share | 0.598 | 0.597 +- 0.002 | -0.0006 | [-0.0075, +0.0108] |
+| W=4 | blocking rate | 0.581 | 0.587 +- 0.002 | **+0.0059** | **[+0.0013, +0.0093]** |
+| W=4 | top-K hit rate | 0.898 | 0.901 +- 0.001 | +0.0029 | [-0.0026, +0.0085] |
+| W=8 | served share | 0.943 | 0.944 +- 0.002 | +0.0011 | [-0.0023, +0.0044] |
+| W=8 | blocking rate | 0.000 | 0.000 | 0 | 0 |
+| W=8 | top-K hit rate | 0.898 | 0.901 +- 0.001 | +0.0029 | [-0.0026, +0.0085] |
+
+Honest reading: the NN gives **no practical gain** over the last-hour forecast. Served share and top-K hit rate differ from last-hour by less than the uncertainty. The one difference whose interval excludes zero goes against the NN: at W=4 it blocks about 0.6 percentage points more requests. At W=8 nothing is blocked either way. The same-hour-last-week baseline is much worse still (Stage 4). The paired standard error treats the 168 hours as independent; hourly traffic is autocorrelated, so the 24-hour moving-block bootstrap interval (2,000 resamples, fixed seed) is the more reliable one. Likely reasons, not tested here: a 4-week series is short, last hour is a strong predictor for a slowly varying aggregate, and the NN is trained on the log scale while the planner cares about the largest pairs.
 
 ## Layout
 `config.yaml` (all parameters) | `src/{data,nn,search,csp,integration,eval}/` | `src/common.py` (interface contract) | `src/tests/` | `data/{raw,processed}/` | `outputs/` | `report/` | `docs/`

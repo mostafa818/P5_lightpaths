@@ -7,12 +7,14 @@ import numpy as np
 from integration.pipeline import default_planner, plan, evaluate, nn_forecast_fn, last_hour_forecast_fn
 
 
-def run(K: int, W: int, seeds, hours, method: str = "fc+ac3", planner=None, H=None, max_assignments=None):
+def run(K: int, W: int, seeds, hours, method: str = "fc+ac3", planner=None, H=None, max_assignments=None,
+        include_last_hour: bool = True):
     if planner is None:
         planner, H, cfg = default_planner()
         max_assignments = max_assignments or cfg["csp"]["max_assignments"]
     rows = []
-    sources = [("last_hour", None, last_hour_forecast_fn(H))] + [("nn", s, nn_forecast_fn(s)) for s in seeds]
+    sources = ([("last_hour", None, last_hour_forecast_fn(H))] if include_last_hour else []) + \
+              [("nn", s, nn_forecast_fn(s)) for s in seeds]
     for src, seed, fn in sources:
         for t in hours:
             r = plan(planner, t, fn(t), K, W, method=method, max_assignments=max_assignments)
