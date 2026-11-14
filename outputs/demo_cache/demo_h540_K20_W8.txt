@@ -1,0 +1,130 @@
+=== INPUT: hour 540, K=20, W=8, method=fc+ac3, forecast=NN (seed 0), strict=False ===
+predicted top-20 pairs (priority order); 'actual' is the real demand of that hour, shown for comparison only
+  rank  pair              predicted     actual  in true top-20
+     1  WASHng->ATLAng       148.5M     239.6M  yes
+     2  LOSAng->NYCMng        98.1M      90.4M  yes
+     3  CHINng->NYCMng        97.8M     104.5M  yes
+     4  WASHng->NYCMng        96.0M      81.5M  yes
+     5  NYCMng->CHINng        91.2M      60.8M  yes
+     6  WASHng->LOSAng        91.2M      90.5M  yes
+     7  LOSAng->WASHng        77.0M      78.5M  yes
+     8  NYCMng->LOSAng        67.7M      55.5M  yes
+     9  WASHng->CHINng        55.5M      52.6M  yes
+    10  WASHng->DNVRng        52.2M      49.3M  yes
+    11  WASHng->IPLSng        51.1M      41.4M  yes
+    12  CHINng->LOSAng        46.1M      38.8M  yes
+    13  NYCMng->WASHng        44.3M      35.2M  yes
+    14  IPLSng->NYCMng        41.5M      41.3M  yes
+    15  DNVRng->IPLSng        40.5M      25.1M  no
+    16  DNVRng->WASHng        39.2M      44.1M  yes
+    17  IPLSng->LOSAng        37.1M      18.2M  no
+    18  CHINng->WASHng        36.7M      23.0M  no
+    19  SNVAng->LOSAng        35.8M      32.3M  yes
+    20  LOSAng->STTLng        33.4M      36.0M  yes
+
+=== FEEDBACK LOOP (1 solves) ===
+hour 540  K=20  W=8  method=fc+ac3  strict=False
+  iter 1: k=3 requests=20 -> ok (assignments 20, backtracks 0) [first attempt]
+  result: ok, served 20/20
+
+=== ROUTES ===
+  WASHng->ATLAng: 3 candidate route(s) within reach
+     * [0] WASHng-ATLAng  899 km
+       [1] WASHng-NYCMng-CHINng-IPLSng-ATLAng  2329 km
+       [2] WASHng-NYCMng-CHINng-IPLSng-KSCYng-HSTNng-ATLAng  4746 km
+  LOSAng->NYCMng: 1 candidate route(s) within reach
+     * [0] LOSAng-HSTNng-ATLAng-WASHng-NYCMng  4506 km
+  CHINng->NYCMng: 3 candidate route(s) within reach
+     * [0] CHINng-NYCMng  1145 km
+       [1] CHINng-IPLSng-ATLAng-WASHng-NYCMng  2083 km
+       [2] CHINng-IPLSng-KSCYng-HSTNng-ATLAng-WASHng-NYCMng  4501 km
+  WASHng->NYCMng: 2 candidate route(s) within reach
+     * [0] WASHng-NYCMng  335 km
+       [1] WASHng-ATLAng-IPLSng-CHINng-NYCMng  2893 km
+  NYCMng->CHINng: 3 candidate route(s) within reach
+     * [0] NYCMng-CHINng  1145 km
+       [1] NYCMng-WASHng-ATLAng-IPLSng-CHINng  2083 km
+       [2] NYCMng-WASHng-ATLAng-HSTNng-KSCYng-IPLSng-CHINng  4501 km
+  WASHng->LOSAng: 1 candidate route(s) within reach
+     * [0] WASHng-ATLAng-HSTNng-LOSAng  4171 km
+  LOSAng->WASHng: 1 candidate route(s) within reach
+     * [0] LOSAng-HSTNng-ATLAng-WASHng  4171 km
+  NYCMng->LOSAng: 1 candidate route(s) within reach
+     * [0] NYCMng-WASHng-ATLAng-HSTNng-LOSAng  4506 km
+  WASHng->CHINng: 3 candidate route(s) within reach
+     * [0] WASHng-NYCMng-CHINng  1480 km
+       [1] WASHng-ATLAng-IPLSng-CHINng  1748 km
+       [2] WASHng-ATLAng-HSTNng-KSCYng-IPLSng-CHINng  4166 km
+  WASHng->DNVRng: 3 candidate route(s) within reach
+     * [0] WASHng-ATLAng-IPLSng-KSCYng-DNVRng  3135 km
+       [1] WASHng-NYCMng-CHINng-IPLSng-KSCYng-DNVRng  3384 km
+       [2] WASHng-ATLAng-HSTNng-KSCYng-DNVRng  3749 km
+  WASHng->IPLSng: 3 candidate route(s) within reach
+     * [0] WASHng-ATLAng-IPLSng  1489 km
+       [1] WASHng-NYCMng-CHINng-IPLSng  1739 km
+       [2] WASHng-ATLAng-HSTNng-KSCYng-IPLSng  3906 km
+  CHINng->LOSAng: 3 candidate route(s) within reach
+     * [0] CHINng-IPLSng-KSCYng-DNVRng-SNVAng-LOSAng  3922 km
+       [1] CHINng-IPLSng-ATLAng-HSTNng-LOSAng  4121 km
+       [2] CHINng-IPLSng-KSCYng-HSTNng-LOSAng  4380 km
+  NYCMng->WASHng: 2 candidate route(s) within reach
+     * [0] NYCMng-WASHng  335 km
+       [1] NYCMng-CHINng-IPLSng-ATLAng-WASHng  2893 km
+  IPLSng->NYCMng: 3 candidate route(s) within reach
+     * [0] IPLSng-CHINng-NYCMng  1404 km
+       [1] IPLSng-ATLAng-WASHng-NYCMng  1824 km
+       [2] IPLSng-KSCYng-HSTNng-ATLAng-WASHng-NYCMng  4241 km
+  DNVRng->IPLSng: 2 candidate route(s) within reach
+     * [0] DNVRng-KSCYng-IPLSng  1645 km
+       [1] DNVRng-KSCYng-HSTNng-ATLAng-IPLSng  3440 km
+  DNVRng->WASHng: 3 candidate route(s) within reach
+     * [0] DNVRng-KSCYng-IPLSng-ATLAng-WASHng  3135 km
+       [1] DNVRng-KSCYng-IPLSng-CHINng-NYCMng-WASHng  3384 km
+       [2] DNVRng-KSCYng-HSTNng-ATLAng-WASHng  3749 km
+  IPLSng->LOSAng: 3 candidate route(s) within reach
+     * [0] IPLSng-KSCYng-DNVRng-SNVAng-LOSAng  3663 km
+       [1] IPLSng-ATLAng-HSTNng-LOSAng  3862 km
+       [2] IPLSng-KSCYng-HSTNng-LOSAng  4121 km
+  CHINng->WASHng: 3 candidate route(s) within reach
+     * [0] CHINng-NYCMng-WASHng  1480 km
+       [1] CHINng-IPLSng-ATLAng-WASHng  1748 km
+       [2] CHINng-IPLSng-KSCYng-HSTNng-ATLAng-WASHng  4166 km
+  SNVAng->LOSAng: 1 candidate route(s) within reach
+     * [0] SNVAng-LOSAng  504 km
+  LOSAng->STTLng: 2 candidate route(s) within reach
+     * [0] LOSAng-SNVAng-STTLng  1640 km
+       [1] LOSAng-SNVAng-DNVRng-STTLng  3589 km
+
+=== ASSIGNMENT TABLE ===
+  pair                demand  wavelength      km  route
+  WASHng->ATLAng      148.5M           0     899  WASHng-ATLAng
+  LOSAng->NYCMng       98.1M           1    4506  LOSAng-HSTNng-ATLAng-WASHng-NYCMng
+  CHINng->NYCMng       97.8M           0    1145  CHINng-NYCMng
+  WASHng->NYCMng       96.0M           0     335  WASHng-NYCMng
+  NYCMng->CHINng       91.2M           1    1145  NYCMng-CHINng
+  WASHng->LOSAng       91.2M           2    4171  WASHng-ATLAng-HSTNng-LOSAng
+  LOSAng->WASHng       77.0M           3    4171  LOSAng-HSTNng-ATLAng-WASHng
+  NYCMng->LOSAng       67.7M           4    4506  NYCMng-WASHng-ATLAng-HSTNng-LOSAng
+  WASHng->CHINng       55.5M           2    1480  WASHng-NYCMng-CHINng
+  WASHng->DNVRng       52.2M           5    3135  WASHng-ATLAng-IPLSng-KSCYng-DNVRng
+  WASHng->IPLSng       51.1M           6    1489  WASHng-ATLAng-IPLSng
+  CHINng->LOSAng       46.1M           0    3922  CHINng-IPLSng-KSCYng-DNVRng-SNVAng-LOSAng
+  NYCMng->WASHng       44.3M           3     335  NYCMng-WASHng
+  IPLSng->NYCMng       41.5M           3    1404  IPLSng-CHINng-NYCMng
+  DNVRng->IPLSng       40.5M           1    1645  DNVRng-KSCYng-IPLSng
+  DNVRng->WASHng       39.2M           7    3135  DNVRng-KSCYng-IPLSng-ATLAng-WASHng
+  IPLSng->LOSAng       37.1M           2    3663  IPLSng-KSCYng-DNVRng-SNVAng-LOSAng
+  CHINng->WASHng       36.7M           5    1480  CHINng-NYCMng-WASHng
+  SNVAng->LOSAng       35.8M           1     504  SNVAng-LOSAng
+  LOSAng->STTLng       33.4M           3    1640  LOSAng-SNVAng-STTLng
+
+=== BLOCKED (0) ===
+  none
+
+=== SUMMARY === served 20/20  served share 0.919  blocking rate 0.000  top-K hit rate 0.85  CSP assignments 20 backtracks 0  solver time 0.001s
+
+=== FIGURES ===
+   outputs/demo_cache/demo_topology_h540_K20_W8.png
+   outputs/demo_cache/demo_heatmap_h540_K20_W8.png
+   outputs/demo_cache/demo_nn_effect.png
+   CSP domain-size figure (plot c) is Member B's part, not merged yet.
