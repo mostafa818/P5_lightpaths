@@ -35,6 +35,18 @@ measures line coverage.
 - More routes fix a failure (toy network; none exists on Abilene, see the README): `test_integration.py::test_evidence_more_routes_fix_a_failure`
 - A request must be dropped: `test_integration.py::test_evidence_request_must_be_dropped_on_abilene`, `test_integration.py::test_evidence_request_must_be_dropped_on_toy`
 
+## Per-stage test steps of the plan (Member B)
+Where a step's tests need the git-ignored raw files, the line says so (they skip in a fresh clone without them);
+the other lines have at least one test that runs without raw data.
+- 1.9 node mapping (needs raw data): `test_node_mapping.py::test_a_paths_follow_distance_shortest_paths`, `test_node_mapping.py::test_x01_slot21_matches_sndlib_sample`
+- 1.13 data: shape, no NaN or negatives, hourly value = mean of 12: `test_data.py::test_processed_shape_and_values`, `test_data.py::test_hourly_matches_manual_average`, `test_data.py::test_to_hourly_is_mean_of_12`
+- 2.6 search: hand-drawn graph, networkx on all pairs: `test_search.py::test_ucs_and_astar_find_the_hand_computed_shortest_path`, `test_search.py::test_abilene_ucs_and_astar_match_networkx_on_all_pairs`
+- 2.8 routes: all simple paths of the toy graph in order, `src == dst` raises, fewer than k, unreachable, networkx on Abilene: `test_routes.py::test_all_seven_simple_paths_in_order`, `test_routes.py::test_src_equals_dst_raises`, `test_routes.py::test_fewer_than_k_when_fewer_exist`, `test_routes.py::test_unreachable_node_gives_empty_list`, `test_routes.py::test_abilene_routes_match_networkx_on_all_pairs`
+- 2.9 germany50 (needs raw data): `test_germany50.py::test_germany50_size_and_connectivity`, `test_germany50.py::test_germany50_own_haversine_roughly_matches_declared_dist`
+- 3.8 CSP: variants agree with brute force, same solution, valid: `test_csp.py::test_variants_agree_with_brute_force_on_small_instances`, `test_csp.py::test_variants_find_the_same_solution_and_prune_in_order`
+- 4.8 NN: shape, non-negative, same seed same result, no feature uses hour t or later: `test_nn.py::test_forecast_shape_nonnegative`, `test_nn.py::test_same_seed_same_result`, `test_nn.py::test_no_feature_uses_hour_t_or_later`, `test_nn.py::test_forecast_ignores_future`
+- 5.8 pipeline on a toy network and on Abilene, `is_valid` on every output: `test_integration.py::test_metrics_on_toy`, `test_integration.py::test_abilene_full_pipeline_outputs_are_valid`
+
 ## Checks done for plan Step 8.2 and coverage (Member A, run on the Stage 8 branch)
 - **Fresh clone, no raw data** (new directory, new venv, `pip install -r requirements.txt`, `pip install -e .`): 176 passed, 59 skipped, 0 failed. The skips are the tests that need the git-ignored raw files; each says so.
   The first fresh-clone run found one failure (`test_experiments.py::test_exp2_methods_agree_on_a_real_instance` did not skip without the raw topology); fixed in this branch. Every requirement above names at least one test that passes in this setting (verified by running each row's named tests in the clone; the first check found two rows of this very matrix and one row of Member B's draft that depended on raw data only, now fixed).
