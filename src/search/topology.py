@@ -165,7 +165,8 @@ if __name__ == "__main__":
     # python -m search.topology  ->  data/processed/abilene_links.csv
     import yaml
 
-    cfg = yaml.safe_load(open("config.yaml"))
+    with open("config.yaml") as fh:
+        cfg = yaml.safe_load(fh)
     topo = load_topology(cfg["paths"]["abilene_topology"])
     out = Path(cfg["paths"]["processed"]) / "abilene_links.csv"
     write_links_csv(topo, out)

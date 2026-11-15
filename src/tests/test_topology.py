@@ -91,7 +91,8 @@ class TestRealAbilene:
         assert len(self.topo.links) == 15
 
     def test_node_order_matches_config(self):
-        cfg = yaml.safe_load(open("config.yaml"))
+        with open("config.yaml") as fh:
+            cfg = yaml.safe_load(fh)
         assert sorted(self.topo.nodes) == sorted(cfg["node_order"])
         assert list(self.topo.nodes) == cfg["node_order"]
 
