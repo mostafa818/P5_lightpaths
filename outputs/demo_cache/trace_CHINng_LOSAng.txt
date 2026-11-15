@@ -1,0 +1,17 @@
+=== SEARCH TRACE (UCS vs A*), CHINng -> LOSAng ===
+step  UCS (h = 0)  A* (haversine h)
+   1  CHINng *     CHINng *
+   2  IPLSng *     IPLSng *
+   3  ATLAng       KSCYng *
+   4  ATLAM5       DNVRng *
+   5  NYCMng       ATLAng
+   6  KSCYng *     SNVAng *
+   7  WASHng       LOSAng *
+   8  DNVRng *     -
+   9  HSTNng       -
+  10  SNVAng *     -
+  11  STTLng       -
+  12  LOSAng *     -
+UCS: expanded 12, generated 14, cost 3922 km, path CHINng-IPLSng-KSCYng-DNVRng-SNVAng-LOSAng
+A* : expanded 7, generated 13, cost 3922 km, path CHINng-IPLSng-KSCYng-DNVRng-SNVAng-LOSAng
+(* = on the final path; A* expanded 5 fewer nodes for the same cost)
