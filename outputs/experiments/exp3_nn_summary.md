@@ -1,6 +1,6 @@
 ## Experiment 3: NN vs last-hour forecast inside the planner
 
-168 test hours (504-671), 5 NN seeds, planner BT+FC+AC-3 with precheck, cap 1,000,000 assignments, k = 3 routes (5 on retry), reach 5000 km. Served share and top-K hit rate: higher is better; blocking rate: lower is better. The last-hour forecast is deterministic, so it has no seed spread. The paired difference averages the 5 seeds per hour; its s.e. treats the 168 hours as independent, which they are not (hourly traffic is autocorrelated), so the moving-block bootstrap CI (24-hour blocks, 2000 resamples, seed 42) is the more reliable interval.
+168 test hours (504-671), 5 NN seeds, planner BT+FC+AC-3 with precheck, cap 1,000,000 assignments, k = 3 routes (5 on retry), reach 5000 km. Served share and top-K hit rate: higher is better; blocking rate: lower is better. The last-hour forecast is deterministic, so it has no seed spread. The paired difference averages the 5 seeds per hour; its s.e. treats the 168 hours as independent, which they are not (hourly traffic is autocorrelated), so the moving-block bootstrap CI (24-hour blocks, 2000 resamples, seed 42) is the more reliable interval; with only 7 blocks it is still rough. The top-K hit rate depends on the forecast only, not on W, so its two rows are one comparison; blocking at W=8 is zero for every run. That leaves four distinct comparisons (served share at W=4 and W=8, blocking at W=4, hit rate), so a borderline interval should be read with caution.
 
 ### K=20, W=4
 

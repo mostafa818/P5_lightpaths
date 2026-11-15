@@ -61,6 +61,14 @@ def test_write_outputs_to_temp_folder(tmp_path):
     assert [s["W"] for s in data["settings"]] == [4, 8] and len(data["runs"]) == len(df)
 
 
+def test_write_outputs_can_skip_the_json(tmp_path):
+    df = pd.concat([toy_frame(20, 4), toy_frame(20, 8)], ignore_index=True)
+    e3.write_outputs(df, tmp_path, json_path=tmp_path / "nn_effect.json", write_json=False)
+    assert (tmp_path / "exp3_nn_summary.md").exists() and not (tmp_path / "nn_effect.json").exists()
+    text = (tmp_path / "exp3_nn_summary.md").read_text()
+    assert "only 7 blocks" in text and "four distinct comparisons" in text
+
+
 def test_registered_in_run_experiments():
     assert EXPERIMENTS["exp3"] == "eval.exp3_nn"
 

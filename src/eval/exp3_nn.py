@@ -99,12 +99,11 @@ def summarise_setting(df: pd.DataFrame, K: int, W: int) -> tuple:
     return table, per_seed
 
 
-def write_outputs(df: pd.DataFrame, od, json_path=None) -> None:
+def write_outputs(df: pd.DataFrame, od, json_path=None, write_json: bool = True) -> None:
     parts = []
     for K, W in SETTINGS:
         table, per_seed = summarise_setting(df, K, W)
         spread = "; ".join(f"{label}: " + ", ".join(f"{v:+.4f}" for v in per_seed[key]) for key, label in METRICS)
-        n_blk = int(df[(df.K == K) & (df.W == W) & (df.source == "nn")].n_blocked.mean() * 100) / 100
         parts.append(f"### K={K}, W={W}\n\n{table}\nPer-seed paired mean difference NN − last-hour ({spread}).\n")
     text = ("## Experiment 3: NN vs last-hour forecast inside the planner\n\n"
             f"{len(HOURS)} test hours (504-671), {len(SEEDS)} NN seeds, planner BT+FC+AC-3 with precheck, cap "
@@ -113,11 +112,15 @@ def write_outputs(df: pd.DataFrame, od, json_path=None) -> None:
             "forecast is deterministic, so it has no seed spread. The paired difference averages the 5 seeds per hour; its "
             "s.e. treats the 168 hours as independent, which they are not (hourly traffic is autocorrelated), so the "
             f"moving-block bootstrap CI ({BLOCK}-hour blocks, {N_BOOT} resamples, seed {CFG['seed']}) is the more "
-            "reliable interval.\n\n" + "\n".join(parts))
+            f"reliable interval; with only {len(HOURS) // BLOCK} blocks it is still rough. The top-K hit rate depends on the "
+            "forecast only, not on W, so its two rows are one comparison; blocking at W=8 is zero for every run. That leaves "
+            "four distinct comparisons (served share at W=4 and W=8, blocking at W=4, hit rate), so a borderline interval "
+            "should be read with caution.\n\n" + "\n".join(parts))
     (od / "exp3_nn_summary.md").write_text(text)
     data = {"settings": [{"K": K, "W": W, "n_hours": len(HOURS), "n_seeds": len(SEEDS), "method": "fc+ac3"} for K, W in SETTINGS],
             "runs": df.to_dict("records")}
-    json.dump(data, open(json_path or ROOT / "outputs" / "nn_effect.json", "w"))   # also feeds plot (d) of run_demo.py
+    if write_json:                                                                  # also feeds plot (d) of run_demo.py
+        json.dump(data, open(json_path or ROOT / "outputs" / "nn_effect.json", "w"))
     plot_nn_effect(data, str(od / "exp3_nn.png"))
     print(text)
 
@@ -126,7 +129,8 @@ def main(reuse: bool = False, max_seconds: float = None) -> None:
     t0 = time.time()
     od = out_dir()
     if reuse:
-        write_outputs(pd.read_csv(od / "exp3_nn_raw.csv"), od)
+        # --reuse leaves an existing outputs/nn_effect.json alone (a CSV round trip only changes float formatting)
+        write_outputs(pd.read_csv(od / "exp3_nn_raw.csv"), od, write_json=not (ROOT / "outputs" / "nn_effect.json").exists())
         return
     df = run(max_seconds)
     if df is None:
