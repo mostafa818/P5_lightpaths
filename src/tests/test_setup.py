@@ -3,7 +3,8 @@ from common import Request, Route, Stats, Result, link_id
 
 
 def test_config_loads():
-    cfg = yaml.safe_load(open("config.yaml"))
+    with open("config.yaml") as fh:
+        cfg = yaml.safe_load(fh)
     assert cfg["rwa"]["num_wavelengths"] in (4, 8)
 
 

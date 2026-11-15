@@ -47,7 +47,8 @@ def main():
               ", ".join(f"{k} {m:+.4f} +- {s:.4f}" for k, (m, s, _) in pd_.items()))
         print(f"  ({time.time() - t0:.0f}s)")
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
-    json.dump(out, open(a.out, "w"))
+    with open(a.out, "w") as fh:
+        json.dump(out, fh)
 
 
 if __name__ == "__main__":

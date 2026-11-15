@@ -86,8 +86,10 @@ class Planner:
 
 def default_planner(config_path: str = None) -> tuple:
     """(Planner, H, cfg) built from config.yaml, data/processed and the Abilene topology."""
-    cfg = yaml.safe_load(open(config_path or os.path.join(ROOT, "config.yaml")))
-    meta = json.load(open(os.path.join(ROOT, cfg["paths"]["processed"], "meta.json")))
+    with open(config_path or os.path.join(ROOT, "config.yaml")) as fh:
+        cfg = yaml.safe_load(fh)
+    with open(os.path.join(ROOT, cfg["paths"]["processed"], "meta.json")) as fh:
+        meta = json.load(fh)
     H = np.load(os.path.join(ROOT, cfg["paths"]["processed"], "hourly.npz"))["hourly"]
     g = Graph.from_topology(load_topology(os.path.join(ROOT, cfg["paths"]["abilene_topology"])))
     r = cfg["rwa"]

@@ -51,6 +51,6 @@ def sanity_check(h: np.ndarray) -> dict:
     return {
         "n_nan": int(np.isnan(h).sum()),
         "n_negative": int((h < 0).sum()),
-        "n_allzero_rows": int((h.sum(axis=1) == 0).sum()),
-        "n_allzero_pairs": int((h.sum(axis=0) == 0).sum()),
+        "n_allzero_rows": int((h == 0).all(axis=1).sum()),      # not sum()==0: positives and negatives could cancel
+        "n_allzero_pairs": int((h == 0).all(axis=0).sum()),
     }

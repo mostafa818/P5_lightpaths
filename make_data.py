@@ -1,11 +1,13 @@
 """Steps 1.2-1.10: build data/processed/hourly.npz and meta.json (reproducible, seeded)."""
 import sys, os, json, hashlib, datetime
+from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 import numpy as np, yaml
 from data import pipeline as P
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-cfg = yaml.safe_load(open(os.path.join(ROOT, "config.yaml")))
+with open(os.path.join(ROOT, "config.yaml")) as fh:
+    cfg = yaml.safe_load(fh)
 np.random.seed(cfg["seed"])   # this stage is deterministic (no random step); seeded for safety
 raw_dir = os.path.join(ROOT, cfg["paths"]["raw"])
 out_dir = os.path.join(ROOT, cfg["paths"]["processed"])
@@ -26,7 +28,7 @@ for w in weeks:
     h = P.drop_diagonal(P.to_hourly(x))             # 1.6, 1.7
     assert h.shape == (168, 132), h.shape
     hourly.append(h)
-    files[w] = {"bytes": os.path.getsize(path), "sha256": hashlib.sha256(open(path, "rb").read()).hexdigest()}
+    files[w] = {"bytes": os.path.getsize(path), "sha256": hashlib.sha256(Path(path).read_bytes()).hexdigest()}
 H = np.concatenate(hourly, axis=0)                  # 1.10: (672, 132)
 chk = P.sanity_check(H)                             # 1.8
 # 1.8 boundary continuity: compare median total of last vs first 12 five-minute slots (a burst
@@ -51,7 +53,8 @@ meta = {
     "sanity": chk, "shape": list(H.shape),
 }
 np.savez_compressed(os.path.join(out_dir, "hourly.npz"), hourly=H)
-json.dump(meta, open(os.path.join(out_dir, "meta.json"), "w"), indent=1)
+with open(os.path.join(out_dir, "meta.json"), "w") as fh:
+    json.dump(meta, fh, indent=1)
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 fig, ax = plt.subplots(2, 1, figsize=(11, 6))

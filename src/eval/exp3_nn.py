@@ -120,7 +120,8 @@ def write_outputs(df: pd.DataFrame, od, json_path=None, write_json: bool = True)
     data = {"settings": [{"K": K, "W": W, "n_hours": len(HOURS), "n_seeds": len(SEEDS), "method": "fc+ac3"} for K, W in SETTINGS],
             "runs": df.to_dict("records")}
     if write_json:                                                                  # also feeds plot (d) of run_demo.py
-        json.dump(data, open(json_path or ROOT / "outputs" / "nn_effect.json", "w"))
+        with open(json_path or ROOT / "outputs" / "nn_effect.json", "w") as fh:
+            json.dump(data, fh)
     plot_nn_effect(data, str(od / "exp3_nn.png"))
     print(text)
 

@@ -172,3 +172,19 @@ def test_paired_differences_hand_computed():
 
 def test_wavelength_palette_has_distinct_colours_up_to_eight():
     assert len(set(plots._colors(8))) == 8 and len(set(plots._colors(12))) == 12
+
+
+# ---------- Stage 8 additions (Member A): remaining run_demo branches ---------------------------------
+@needs_abilene
+def test_demo_strict_failure_with_plots_skips_the_plan_figures(capsys, tmp_path):
+    out = run_demo(["--W", "4", "--strict", "--plots", "--outdir", str(tmp_path)], capsys)
+    assert "no topology/heatmap figure" in out and "No solution" in out
+    assert not (tmp_path / "demo_topology_h540_K20_W4.png").exists()
+
+
+@needs_abilene
+def test_demo_plots_without_the_cached_nn_effect_file_explains_how_to_make_it(capsys, tmp_path, monkeypatch):
+    monkeypatch.setattr(plots, "load_nn_effect", lambda path: None)
+    out = run_demo(["--plots", "--outdir", str(tmp_path)], capsys)
+    assert "python -m eval.nn_effect" in out
+    assert (tmp_path / "demo_topology_h540_K20_W8.png").exists() and not (tmp_path / "demo_nn_effect.png").exists()
