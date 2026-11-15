@@ -135,3 +135,11 @@ def test_nn_effect_cli_writes_json(monkeypatch, tmp_path):
     nn_effect.main()
     data = json.loads(out.read_text())
     assert data["settings"][0]["W"] == 8 and len(data["runs"]) == 2 * 168
+
+
+@needs_abilene
+def test_main_stopped_by_max_seconds_writes_nothing(monkeypatch, tmp_path, capsys):
+    _small_experiment(monkeypatch, tmp_path)
+    e3.main(max_seconds=-1)                                        # stops before the first chunk
+    assert "run the same command again" in capsys.readouterr().out
+    assert not (tmp_path / "exp3_nn_raw.csv").exists() and not (tmp_path / "exp3_nn_summary.md").exists()
