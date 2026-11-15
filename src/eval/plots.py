@@ -178,4 +178,7 @@ def plot_nn_effect(data: dict, path: str) -> str:
 
 
 def load_nn_effect(path: str):
-    return json.load(open(path)) if os.path.exists(path) else None
+    if not os.path.exists(path):
+        return None
+    with open(path) as fh:
+        return json.load(fh)

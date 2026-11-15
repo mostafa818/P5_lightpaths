@@ -1,4 +1,4 @@
-import os
+import json, os
 import numpy as np, pytest
 from nn import features as F, evaluate as E
 from nn.model import train_mlp
@@ -121,3 +121,48 @@ def test_early_stopping_restores_best_weights(H):
 def test_common_forecast_delegates_to_nn():
     import common
     assert np.array_equal(common.forecast(504), FC.forecast(504, seed=0))
+
+
+# ---------- Stage 8 additions (Member A) ----------------------------------------------------------------
+def test_scaler_json_round_trip(tmp_path):
+    sc = F.Scaler(1.25, 0.5)
+    sc.to_json(str(tmp_path / "s.json"))
+    back = F.Scaler.from_json(str(tmp_path / "s.json"))
+    assert (back.mu, back.sd) == (1.25, 0.5)
+    x = np.array([0.0, 3.0, 100.0])
+    assert np.allclose(back.inverse(back.transform(x)), x)
+
+
+def test_topk_hits_per_hour_agrees_with_the_mean_hit_rate():
+    rng = np.random.default_rng(3)
+    true, pred = rng.random((12, 132)), rng.random((12, 132))
+    per_hour = E.topk_hits_per_hour(true, pred, 20)
+    assert per_hour.shape == (12,) and per_hour.mean() == pytest.approx(E.topk_hit_rate(true, pred, 20))
+    assert (per_hour >= 0).all() and (per_hour <= 1).all()
+
+
+@needs_data
+def test_train_script_end_to_end_in_a_temporary_copy(tmp_path, monkeypatch):
+    """`python -m nn.train` runs, saves scaler, models, curves and results, and its baselines match a direct computation."""
+    import shutil, yaml
+    from nn import train
+    (tmp_path / "data" / "processed").mkdir(parents=True)
+    for f in ("hourly.npz", "meta.json"):
+        shutil.copy(os.path.join(ROOT, "data", "processed", f), tmp_path / "data" / "processed" / f)
+    with open(os.path.join(ROOT, "config.yaml")) as fh:
+        cfg = yaml.safe_load(fh)
+    cfg["nn"].update({"seeds": [0, 1], "max_epochs": 3, "patience": 2})
+    with open(tmp_path / "config.yaml", "w") as fh:
+        yaml.safe_dump(cfg, fh)
+    (tmp_path / "outputs").mkdir()
+    monkeypatch.setattr(train, "ROOT", str(tmp_path))
+    train.main()
+    out = tmp_path / "outputs"
+    assert (out / "nn" / "scaler.json").exists() and (out / "nn" / "mlp_seed1.joblib").exists() and (out / "nn" / "curve_seed0.json").exists()
+    with open(out / "nn_eval.json") as fh:
+        res = json.load(fh)
+    assert set(res["nn_seeds"]) == {"0", "1"} and 0 < res["nn_seeds"]["0"]["epochs"] <= 3
+    H = np.load(HOURLY)["hourly"]
+    direct = E.metrics(H[504:672], E.baseline_last_hour(H, range(504, 672)))
+    assert res["baseline_last_hour"]["mae"] == pytest.approx(direct["mae"])
+    assert res["nn_mean"]["mae"] > 0 and set(res["paired_hit_diff_vs_last_hour"]) == {"hit@10", "hit@20", "hit@40"}

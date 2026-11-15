@@ -10,8 +10,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 
 
 def main():
-    cfg = yaml.safe_load(open(os.path.join(ROOT, "config.yaml")))
-    meta = json.load(open(os.path.join(ROOT, "data/processed/meta.json")))
+    with open(os.path.join(ROOT, "config.yaml")) as fh:
+        cfg = yaml.safe_load(fh)
+    with open(os.path.join(ROOT, "data/processed/meta.json")) as fh:
+        meta = json.load(fh)
     H = np.load(os.path.join(ROOT, "data/processed/hourly.npz"))["hourly"]
     (tr0, tr1), (va0, va1), (te0, te1) = (meta["split"][k] for k in ("train", "val", "test"))
     first = meta["split"]["first_target_hour"]
@@ -46,7 +48,8 @@ def main():
         r["best_val_mse_log"] = min(h["val_mse"] for h in hist)
         r["val"] = E.metrics(H[list(val_ts)], vpred)
         results["nn_seeds"][str(seed)] = r
-        json.dump(hist, open(os.path.join(out_dir, f"curve_seed{seed}.json"), "w"))
+        with open(os.path.join(out_dir, f"curve_seed{seed}.json"), "w") as fh:
+            json.dump(hist, fh)
         print(f"seed {seed}: epochs {r['epochs']} " + " ".join(f"{k} {v:.3f}" for k, v in r.items() if k in ("mae", "rmse", "hit@10", "hit@20", "hit@40")))
     keys = ["mae", "rmse", "hit@10", "hit@20", "hit@40"]
     results["nn_mean"] = {k: float(np.mean([r[k] for r in results["nn_seeds"].values()])) for k in keys}
@@ -57,7 +60,8 @@ def main():
         d = np.mean(paired[k], axis=0)
         results["paired_hit_diff_vs_last_hour"][f"hit@{k}"] = {
             "mean": float(d.mean()), "se": float(d.std(ddof=1) / np.sqrt(len(d))), "n_hours": int(len(d))}
-    json.dump(results, open(os.path.join(ROOT, "outputs", "nn_eval.json"), "w"), indent=1)
+    with open(os.path.join(ROOT, "outputs", "nn_eval.json"), "w") as fh:
+        json.dump(results, fh, indent=1)
     print("\n%-22s" % "method" + " ".join("%10s" % k for k in keys))
     for name in ("baseline_last_hour", "baseline_last_week"):
         print("%-22s" % name + " ".join("%10.3f" % results[name][k] for k in keys))

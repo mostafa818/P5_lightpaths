@@ -57,7 +57,7 @@ def test_write_outputs_to_temp_folder(tmp_path):
     df = pd.concat([toy_frame(20, 4), toy_frame(20, 8)], ignore_index=True)
     e3.write_outputs(df, tmp_path, json_path=tmp_path / "nn_effect.json")
     assert (tmp_path / "exp3_nn_summary.md").exists() and (tmp_path / "exp3_nn.png").stat().st_size > 2000
-    data = json.load(open(tmp_path / "nn_effect.json"))
+    data = json.loads((tmp_path / "nn_effect.json").read_text())
     assert [s["W"] for s in data["settings"]] == [4, 8] and len(data["runs"]) == len(df)
 
 
@@ -83,3 +83,63 @@ def test_committed_raw_results_are_complete_and_consistent():
         assert g[["served_share", "blocking_rate", "topk_hit_rate"]].apply(lambda c: c.between(0, 1 + 1e-9).all()).all()   # tolerance: float sums
     w8 = df[(df.W == 8) & (df.source == "nn")]
     assert (w8.blocking_rate == 0).mean() > 0.95       # at W=8 almost nothing is blocked
+
+
+# ---------- Stage 8 additions (Member A): the resumable run and the CLI ---------------------------------
+def _small_experiment(monkeypatch, tmp_path):
+    monkeypatch.setattr(e3, "SETTINGS", [(10, 8)])
+    monkeypatch.setattr(e3, "SEEDS", [0])
+    monkeypatch.setattr(e3, "HOURS", [510, 511])
+    monkeypatch.setattr(e3, "out_dir", lambda: tmp_path)
+    (tmp_path / "outputs").mkdir()
+    monkeypatch.setattr(e3, "ROOT", tmp_path)                     # so main() never touches the real outputs/nn_effect.json
+
+
+needs_abilene = pytest.mark.skipif(not (os.path.exists(os.path.join(ROOT, "data", "processed", "hourly.npz"))
+                                        and os.path.exists(os.path.join(ROOT, "outputs", "nn", "mlp_seed0.joblib"))
+                                        and os.path.exists(os.path.join(ROOT, "data", "raw", "topology", "abilene_sndlib_native.txt"))),
+                                   reason="needs processed data, NN models and the Abilene topology file")
+
+
+@needs_abilene
+def test_run_writes_chunks_and_resumes_without_recomputing(monkeypatch, tmp_path):
+    _small_experiment(monkeypatch, tmp_path)
+    assert e3.run(max_seconds=-1) is None                          # stops before the first chunk: nothing written
+    assert not list((tmp_path / ".exp3_chunks").glob("*.csv"))
+    df = e3.run()
+    assert len(df) == 2 * 2 and set(df.source) == {"last_hour", "nn"}
+    assert len(list((tmp_path / ".exp3_chunks").glob("*.csv"))) == 2
+    monkeypatch.setattr(e3, "run_planner", lambda *a, **k: (_ for _ in ()).throw(AssertionError("recomputed a finished chunk")))
+    pd.testing.assert_frame_equal(e3.run(), df, check_dtype=False)   # second run reads the chunks only
+
+
+@needs_abilene
+def test_main_full_and_reuse_paths(monkeypatch, tmp_path, capsys):
+    _small_experiment(monkeypatch, tmp_path)
+    e3.main()
+    assert (tmp_path / "exp3_nn_raw.csv").exists() and (tmp_path / "exp3_nn_summary.md").exists()
+    assert (tmp_path / "outputs" / "nn_effect.json").exists()
+    before = (tmp_path / "outputs" / "nn_effect.json").read_bytes()
+    (tmp_path / "exp3_nn_summary.md").unlink()
+    e3.main(reuse=True)                                            # rebuilds the summary, leaves the existing json alone
+    assert (tmp_path / "exp3_nn_summary.md").exists() and (tmp_path / "outputs" / "nn_effect.json").read_bytes() == before
+    assert "exp3 done" in capsys.readouterr().out
+
+
+@needs_abilene
+def test_nn_effect_cli_writes_json(monkeypatch, tmp_path):
+    import sys
+    from eval import nn_effect
+    out = tmp_path / "ne.json"
+    monkeypatch.setattr(sys, "argv", ["nn_effect", "--K", "10", "--W", "8", "--seeds", "0", "--out", str(out)])
+    nn_effect.main()
+    data = json.loads(out.read_text())
+    assert data["settings"][0]["W"] == 8 and len(data["runs"]) == 2 * 168
+
+
+@needs_abilene
+def test_main_stopped_by_max_seconds_writes_nothing(monkeypatch, tmp_path, capsys):
+    _small_experiment(monkeypatch, tmp_path)
+    e3.main(max_seconds=-1)                                        # stops before the first chunk
+    assert "run the same command again" in capsys.readouterr().out
+    assert not (tmp_path / "exp3_nn_raw.csv").exists() and not (tmp_path / "exp3_nn_summary.md").exists()

@@ -11,3 +11,6 @@ __pycache__/
 .vscode/
 *.egg-info/
 outputs/experiments/.exp3_chunks/
+
+.coverage
+htmlcov/

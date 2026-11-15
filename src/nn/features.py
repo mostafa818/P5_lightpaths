@@ -29,11 +29,13 @@ class Scaler:
         return np.clip(np.expm1(np.asarray(z) * self.sd + self.mu), 0.0, None)
 
     def to_json(self, path):
-        json.dump({"mu": self.mu, "sd": self.sd}, open(path, "w"))
+        with open(path, "w") as fh:
+            json.dump({"mu": self.mu, "sd": self.sd}, fh)
 
     @classmethod
     def from_json(cls, path):
-        d = json.load(open(path))
+        with open(path) as fh:
+            d = json.load(fh)
         return cls(d["mu"], d["sd"])
 
 

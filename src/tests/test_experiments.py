@@ -39,7 +39,10 @@ def test_exp1_sampling_is_seeded_and_bfs_has_fewest_hops(graphs):
 
 
 def test_exp2_methods_agree_on_a_real_instance():
-    planner, H, _ = e2.default_planner()
+    try:
+        planner, H, _ = e2.default_planner()
+    except FileNotFoundError:
+        pytest.skip("raw topology files not downloaded")
     t = e2.HOURS[0]
     reqs, routes = e2.instance(planner, t, 10, H[t])
     out = {n: solve(reqs, routes, 8, use_fc=f, use_ac3=a, max_assignments=200_000)

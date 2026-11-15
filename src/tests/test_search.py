@@ -172,3 +172,38 @@ def test_germany50_ucs_and_astar_match_networkx_on_sampled_pairs(germany):
         ucs_exp += su.expanded
         astar_exp += sa.expanded
     assert astar_exp < ucs_exp
+
+
+# ---- A* = UCS cost without any raw data (Stage 8: a normal case that still runs in a fresh clone) -------
+def test_random_graphs_ucs_astar_and_bfs_match_networkx_without_raw_data():
+    """150 seeded random graphs (half with real coordinates, half with many tied integer lengths and none):
+    UCS and A* find the networkx optimal cost, BFS the fewest hops, unreachable pairs give None."""
+    import random
+    import networkx as nx
+    from search.graph import Graph, haversine_km
+
+    rng, checked = random.Random(7), 0
+    for trial in range(150):
+        geo = trial % 2 == 0
+        n = rng.randint(4, 12)
+        names = [f"n{i}" for i in range(n)]
+        pos = {v: (rng.uniform(-120, -70), rng.uniform(25, 48)) for v in names}
+        pairs = {tuple(sorted((names[i], names[rng.randrange(i)]))) for i in range(1, n) if rng.random() < 0.9}
+        pairs |= {tuple(sorted(rng.sample(names, 2))) for _ in range(rng.randint(0, n))}
+        edges = [(a, b, haversine_km(*pos[a], *pos[b]) if geo else float(rng.choice([1, 2, 2, 3, 5]))) for a, b in pairs]
+        g = Graph.from_edges(edges, coords=pos if geo else None)
+        for v in names:
+            g.add_node(v)
+        G = nx.Graph()
+        G.add_nodes_from(names)
+        G.add_weighted_edges_from(edges)
+        for _ in range(4):
+            s, d = rng.sample(names, 2)
+            if not nx.has_path(G, s, d):
+                assert ucs(g, s, d) is None and astar(g, s, d) is None and bfs(g, s, d) is None
+                continue
+            want = nx.shortest_path_length(G, s, d, weight="weight")
+            assert ucs(g, s, d)[1] == pytest.approx(want) and astar(g, s, d)[1] == pytest.approx(want)
+            assert len(bfs(g, s, d)[0]) - 1 == nx.shortest_path_length(G, s, d)
+            checked += 1
+    assert checked > 300
