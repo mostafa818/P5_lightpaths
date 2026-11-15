@@ -86,7 +86,7 @@ def main():
 
     if a.trace:
         from search.trace import expansion_trace, format_trace
-        src, dst = a.src or "KSCYng", a.dst or "LOSAng"          # default pair: the biggest A* saving on Abilene
+        src, dst = a.src or "KSCYng", a.dst or "LOSAng"          # default pair: a largest A* saving on Abilene (tied)
         print(f"\n=== SEARCH TRACE (UCS vs A*), {src} -> {dst} ===")
         print(format_trace(expansion_trace(planner.graph, src, dst, "ucs"),
                            expansion_trace(planner.graph, src, dst, "astar")))
