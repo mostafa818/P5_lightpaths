@@ -104,7 +104,7 @@ def test_committed_dataset_is_reproduced_from_the_raw_files_and_hashes_match():
 @needs_processed
 @needs_raw
 def test_make_data_script_reproduces_the_committed_files(tmp_path):
-    """Run the real `make_data.py` in a scratch folder (raw files symlinked) and compare with the committed output."""
+    """Run the real `make_data.py` in a scratch folder (raw files copied) and compare with the committed output."""
     import subprocess, sys, shutil
     (tmp_path / "data" / "raw").mkdir(parents=True)
     (tmp_path / "data" / "processed").mkdir()
