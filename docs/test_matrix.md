@@ -3,16 +3,18 @@
 The plan asks for at least 5 normal, 3 edge and 2 impossible tests. Every requirement below is covered by the tests
 named next to it (`file::test function`, all in `src/tests/`). `src/tests/test_matrix.py` fails if a test named here
 no longer exists or if a section drops below the minimum, so this table cannot rot silently.
+Tests that need the git-ignored raw data skip cleanly in a fresh clone; every requirement below also names at least one test that runs without it (checked, see the last section).
 Run everything with `pytest` (see the README); `pip install coverage` and `coverage run --include="*/src/*,*/run_demo.py,*/make_data.py" -m pytest`
 measures line coverage.
 
 ## Normal (minimum 5)
 - UCS finds the known shortest path: `test_search.py::test_ucs_and_astar_find_the_hand_computed_shortest_path`
-- A* equals UCS cost on all Abilene pairs (and matches networkx): `test_search.py::test_abilene_ucs_and_astar_match_networkx_on_all_pairs`
+- A* and UCS cost equal the networkx optimum, BFS has the fewest hops (150 random graphs, no raw data needed): `test_search.py::test_random_graphs_ucs_astar_and_bfs_match_networkx_without_raw_data`; and on all 132 Abilene pairs (needs the raw topology): `test_search.py::test_abilene_ucs_and_astar_match_networkx_on_all_pairs`
 - Requests sharing a link get different wavelengths: `test_csp.py::test_requests_sharing_a_link_get_different_wavelengths`
 - Link-disjoint requests may share a wavelength: `test_csp.py::test_link_disjoint_requests_may_share_a_wavelength`
 - BT, FC and AC-3 agree and return valid solutions: `test_csp.py::test_variants_agree_with_brute_force_on_small_instances`, `test_csp.py::test_real_abilene_instances_all_variants_agree_and_are_valid`, `test_integration.py::test_methods_agree_and_unknown_method_rejected`
 - Full pipeline output is valid on Abilene for every method: `test_integration.py::test_abilene_full_pipeline_outputs_are_valid`
+- CSP extras: pre-check never changes the answer, AC-3 is sound and reaches a fixed point: `test_csp.py::test_precheck_never_changes_the_answer`, `test_csp.py::test_ac3_reaches_a_fixed_point_and_is_never_unsound`
 - Data: hourly means equal a manual average of 12 five-minute values: `test_data.py::test_hourly_matches_manual_average`
 - NN forecast: shape, non-negative, same seed same result: `test_nn.py::test_forecast_shape_nonnegative`, `test_nn.py::test_same_seed_same_result`
 
