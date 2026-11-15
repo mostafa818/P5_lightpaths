@@ -108,9 +108,9 @@ def test_make_data_script_reproduces_the_committed_files(tmp_path):
     import subprocess, sys, shutil
     (tmp_path / "data" / "raw").mkdir(parents=True)
     (tmp_path / "data" / "processed").mkdir()
-    for w in ("X06", "X07", "X08", "X09"):
-        os.symlink(os.path.join(ROOT, "data", "raw", w + ".gz"), tmp_path / "data" / "raw" / (w + ".gz"))
-    os.symlink(os.path.join(ROOT, "src"), tmp_path / "src")
+    for w in ("X06", "X07", "X08", "X09"):                       # plain copies: symlinks need special rights on Windows
+        shutil.copy(os.path.join(ROOT, "data", "raw", w + ".gz"), tmp_path / "data" / "raw" / (w + ".gz"))
+    shutil.copytree(os.path.join(ROOT, "src"), tmp_path / "src", ignore=shutil.ignore_patterns("__pycache__", "tests"))
     shutil.copy(os.path.join(ROOT, "make_data.py"), tmp_path / "make_data.py")
     shutil.copy(os.path.join(ROOT, "config.yaml"), tmp_path / "config.yaml")
     done = subprocess.run([sys.executable, "make_data.py"], cwd=tmp_path, capture_output=True, text=True, timeout=240)
@@ -125,7 +125,7 @@ def test_make_data_script_reproduces_the_committed_files(tmp_path):
 def test_make_data_fails_clearly_when_a_raw_file_is_missing(tmp_path):
     import subprocess, sys, shutil
     (tmp_path / "data" / "raw").mkdir(parents=True)
-    os.symlink(os.path.join(ROOT, "src"), tmp_path / "src")
+    shutil.copytree(os.path.join(ROOT, "src"), tmp_path / "src", ignore=shutil.ignore_patterns("__pycache__", "tests"))
     shutil.copy(os.path.join(ROOT, "make_data.py"), tmp_path / "make_data.py")
     shutil.copy(os.path.join(ROOT, "config.yaml"), tmp_path / "config.yaml")
     done = subprocess.run([sys.executable, "make_data.py"], cwd=tmp_path, capture_output=True, text=True, timeout=60)
