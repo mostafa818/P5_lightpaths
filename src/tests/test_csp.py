@@ -323,7 +323,8 @@ HOURLY = Path("data/processed/hourly.npz")
 
 
 def real_instance(abilene, hour, K, reach_km, k_routes=3):
-    pairs = json.load(open(META))["pairs"]
+    with open(META) as fh:
+        pairs = json.load(fh)["pairs"]
     demand = np.load(HOURLY)["hourly"][hour]
     top = np.argsort(-demand, kind="stable")[:K]
     rs = [Request(id=int(i), src=pairs[i][0], dst=pairs[i][1], demand=float(demand[i])) for i in top]

@@ -12,7 +12,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "outputs" / "experiments"
-CFG = yaml.safe_load(open(ROOT / "config.yaml"))
+with open(ROOT / "config.yaml") as _fh:
+    CFG = yaml.safe_load(_fh)
 
 # categorical slots 1-3 of the reference palette (blue, orange, aqua): fixed order, one colour per method
 COLORS = {"BFS": "#2a78d6", "UCS": "#eb6834", "A*": "#1baf7a",

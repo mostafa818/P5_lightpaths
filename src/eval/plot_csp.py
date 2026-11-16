@@ -60,7 +60,8 @@ def make_plot(panels, path) -> str:
 
 
 def demo_panels(hour: int = 540) -> list:
-    """The two demo instances (NN forecast): data needed, see the module docstring."""
+    """The two demo instances (NN forecast), see the module docstring. They are built with ``exp2_csp.instance``, so they
+    follow any change to the Experiment 2 instance rule (top-K by predicted demand, routes per request from config)."""
     from eval.exp2_csp import default_planner, instance, nn_forecast_fn
     planner, _, _ = default_planner()
     pred = nn_forecast_fn(0)(hour)

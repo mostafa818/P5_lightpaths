@@ -51,7 +51,8 @@ def germany(germany_topo):
 
 @pytest.fixture(scope="session")
 def reach_km():
-    return yaml.safe_load(open("config.yaml"))["rwa"]["reach_km"]
+    with open("config.yaml") as fh:
+        return yaml.safe_load(fh)["rwa"]["reach_km"]
 
 
 def to_networkx(graph: Graph) -> nx.Graph:

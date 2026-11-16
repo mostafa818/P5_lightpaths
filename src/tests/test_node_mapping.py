@@ -34,7 +34,8 @@ pytestmark = pytest.mark.skipif(
     reason="raw data not downloaded (git-ignored; copy it from the raw-data branch)",
 )
 
-ORDER = yaml.safe_load(open("config.yaml"))["node_order"]
+with open("config.yaml") as _fh:
+    ORDER = yaml.safe_load(_fh)["node_order"]
 
 
 @pytest.fixture(scope="module")
@@ -46,7 +47,7 @@ def topo():
 def routing():
     """A.txt -> (router names in order, demand index -> (src, dst), demand index -> internal directed links)."""
     names, dmd, links = [], {}, collections.defaultdict(list)
-    for ln in open(A_TXT):
+    for ln in Path(A_TXT).read_text().splitlines():
         if ln.startswith("#") or not ln.strip():
             continue
         link, demand, _li, di, _frac = ln.split()
@@ -102,7 +103,7 @@ def test_x01_slot21_matches_sndlib_sample():
         line = [next(fh) for _ in range(22)][21]
     M = np.array(line.split(), float).reshape(144, 5)[:, 0].reshape(12, 12)   # real block, rows = senders
     sample = {}
-    for ln in open(SAMPLE):
+    for ln in Path(SAMPLE).read_text().splitlines():
         m = re.match(r"\s*\S+\s*\(\s*(\S+)\s+(\S+)\s*\)\s+\d+\s+([\d.]+)", ln)
         if m:
             sample[(m.group(1), m.group(2))] = float(m.group(3))
