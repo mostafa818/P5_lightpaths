@@ -246,7 +246,7 @@ planner cares about the largest pairs.
 
 ## Tests
 `pytest` runs everything (238 tests with the raw data present, about 15 s). In a fresh clone **without** the raw data:
-176 passed, 59 skipped, 0 failed; the skipped tests need the git-ignored raw files and say so. The plan's minimum
+178 passed, 60 skipped, 0 failed; the skipped tests need the git-ignored raw files and say so. The plan's minimum
 (5 normal, 3 edge, 2 impossible) is exceeded and mapped test by test in [docs/test_matrix.md](docs/test_matrix.md); that file
 also lists the test for every plan step, and a meta-test (`test_matrix.py`) fails if a named test disappears. Every
 requirement of the plan minimum in it (normal, edge, impossible) has a test that passes without the raw data. Coverage of the data, NN, integration and demo code is 99%
