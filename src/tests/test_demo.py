@@ -188,3 +188,12 @@ def test_demo_plots_without_the_cached_nn_effect_file_explains_how_to_make_it(ca
     out = run_demo(["--plots", "--outdir", str(tmp_path)], capsys)
     assert "python -m eval.nn_effect" in out
     assert (tmp_path / "demo_topology_h540_K20_W8.png").exists() and not (tmp_path / "demo_nn_effect.png").exists()
+
+
+@needs_abilene
+def test_demo_defaults_for_k_and_w_come_from_the_config(capsys):
+    import yaml
+    with open(os.path.join(ROOT, "config.yaml")) as fh:
+        rwa = yaml.safe_load(fh)["rwa"]
+    out = run_demo([], capsys)
+    assert f"K={rwa['top_k_requests']}, W={rwa['num_wavelengths']}" in out

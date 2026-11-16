@@ -130,3 +130,13 @@ def test_make_data_fails_clearly_when_a_raw_file_is_missing(tmp_path):
     shutil.copy(os.path.join(ROOT, "config.yaml"), tmp_path / "config.yaml")
     done = subprocess.run([sys.executable, "make_data.py"], cwd=tmp_path, capture_output=True, text=True, timeout=60)
     assert done.returncode != 0 and "Missing raw files" in (done.stderr + done.stdout) and "X06.gz" in (done.stderr + done.stdout)
+
+
+@needs_processed
+def test_every_hourly_demand_fits_in_one_lightpath():
+    """The 'one lightpath per request' assumption: the largest hourly pair demand is below the configured capacity."""
+    import yaml
+    with open(os.path.join(ROOT, "config.yaml")) as fh:
+        cap = yaml.safe_load(fh)["rwa"]["lightpath_capacity_mbps"]
+    H = np.load(HOURLY)["hourly"]
+    assert H.max() <= cap, f"largest hourly demand {H.max():.0f} Mbps exceeds the lightpath capacity {cap} Mbps"
