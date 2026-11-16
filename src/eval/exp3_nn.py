@@ -91,7 +91,9 @@ def summarise_setting(df: pd.DataFrame, K: int, W: int) -> tuple:
         sign = BETTER[key]
         better, worse = int((sign * diff > 1e-12).sum()), int((sign * diff < -1e-12).sum())
         per_seed[key] = [float((d[(d.source == "nn") & (d.seed == s)].set_index("hour")[key] - lh).mean()) for s in seeds]
-        rows.append([label, f"{lh.mean():.3f}", pm(float(np.mean(nn_seed_means)), float(np.std(nn_seed_means, ddof=1)), 3),
+        nn_cell = (pm(float(np.mean(nn_seed_means)), float(np.std(nn_seed_means, ddof=1)), 3) if len(seeds) > 1
+                   else f"{float(np.mean(nn_seed_means)):.3f} (1 seed, no spread)")
+        rows.append([label, f"{lh.mean():.3f}", nn_cell,
                      f"{diff.mean():+.4f} ± {se:.4f}", f"[{lo:+.4f}, {hi:+.4f}]",
                      f"{better} / {len(diff) - better - worse} / {worse}"])
     table = md_table(["metric", "last-hour", f"NN (mean ± std over {len(seeds)} seeds)", "NN − last-hour, paired (mean ± s.e. over hours)",

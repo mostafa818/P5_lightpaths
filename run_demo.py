@@ -7,6 +7,7 @@
   python run_demo.py --trace --src CHINng --dst LOSAng # trace for another pair
 """
 import argparse, os, sys
+import yaml
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 import numpy as np
 from integration.pipeline import (default_planner, plan, evaluate, nn_forecast_fn, last_hour_forecast_fn, METHODS)
@@ -15,10 +16,12 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 def main():
+    with open(os.path.join(ROOT, "config.yaml")) as fh:
+        defaults = yaml.safe_load(fh)["rwa"]                   # K and W defaults come from config.yaml
     ap = argparse.ArgumentParser(description="NN -> Search -> CSP lightpath planner demo")
     ap.add_argument("--hour", type=int, default=540, help="target hour (test week is 504-671)")
-    ap.add_argument("--K", type=int, default=20, help="number of requests (top-K predicted pairs)")
-    ap.add_argument("--W", type=int, default=8, help="number of wavelengths")
+    ap.add_argument("--K", type=int, default=defaults["top_k_requests"], help="number of requests (top-K predicted pairs)")
+    ap.add_argument("--W", type=int, default=defaults["num_wavelengths"], help="number of wavelengths")
     ap.add_argument("--method", default="fc+ac3", choices=sorted(METHODS), help="CSP method")
     ap.add_argument("--nn", default="on", choices=["on", "off"], help="off = last-hour forecast instead of the NN")
     ap.add_argument("--seed", type=int, default=0, help="NN seed (0-4)")

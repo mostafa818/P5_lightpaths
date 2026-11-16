@@ -143,3 +143,10 @@ def test_main_stopped_by_max_seconds_writes_nothing(monkeypatch, tmp_path, capsy
     e3.main(max_seconds=-1)                                        # stops before the first chunk
     assert "run the same command again" in capsys.readouterr().out
     assert not (tmp_path / "exp3_nn_raw.csv").exists() and not (tmp_path / "exp3_nn_summary.md").exists()
+
+
+def test_summary_with_a_single_seed_has_no_nan():
+    df = toy_frame()
+    df = df[(df.source == "last_hour") | (df.seed == 0)]
+    table, per_seed = e3.summarise_setting(df, 20, 4)
+    assert "nan" not in table.lower() and "1 seed, no spread" in table and len(per_seed["served_share"]) == 1

@@ -2,12 +2,12 @@
 seed: 42
 
 rwa:
-  num_wavelengths: 4        # W: 4 or 8
-  top_k_requests: 20        # K: 10 / 20 / 40
+  num_wavelengths: 8        # W: default of run_demo.py (the experiments vary it: 4 and 8)
+  top_k_requests: 20        # K: default of run_demo.py (Experiment 2 varies it: 10, 20, 40)
   reach_km: 5000            # Step 1.7b: longest shortest path is 4706 km (WASHng-STTLng); at 5000 km all 132 pairs have a route, 120 have >=2 and 98 have 3
   routes_per_request: 3     # first attempt
   max_routes: 5             # used by the feedback loop (Step 5.4)
-  lightpath_capacity_mbps: 9920  # OC-192 usable rate, = Abilene link capacity in the SNDlib topology (Step 1.12)
+  lightpath_capacity_mbps: 9920  # assumption check only: one lightpath carries a whole request; a test asserts every hourly demand fits (Step 1.12)
 
 csp:
   max_assignments: 1000000  # safety cap, returns status "timeout"

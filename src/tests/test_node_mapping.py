@@ -23,19 +23,20 @@ from scipy.stats import spearmanr
 
 from search.topology import load_topology
 
-RAW = Path("data/raw")
-TOPO = RAW / "topology" / "abilene_sndlib_native.txt"
+with open("config.yaml") as _fh:
+    CFG = yaml.safe_load(_fh)
+RAW = Path(CFG["paths"]["raw"])
+TOPO = Path(CFG["paths"]["abilene_topology"])
 A_TXT = RAW / "A.txt"
 X01 = RAW / "X01.gz"
-SAMPLE = RAW / "topology" / "demandMatrix-abilene-zhang-5min-20040301-0145.txt"
+SAMPLE = Path(CFG["paths"]["sndlib_sample_matrix"])
 
 pytestmark = pytest.mark.skipif(
     not all(p.exists() for p in (TOPO, A_TXT, X01, SAMPLE)),
     reason="raw data not downloaded (git-ignored; copy it from the raw-data branch)",
 )
 
-with open("config.yaml") as _fh:
-    ORDER = yaml.safe_load(_fh)["node_order"]
+ORDER = CFG["node_order"]
 
 
 @pytest.fixture(scope="module")
